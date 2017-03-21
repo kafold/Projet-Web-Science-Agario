@@ -15,15 +15,34 @@ var GF = function(){
     var lastTime;
     var fpsContainer;
     var fps; 
+    // for time based animation
+    var delta, oldTime = 0;
+
+    // I use this variable to know when a second has passed
+    var seconds;
     
     // vars for handling inputs
     var inputStates = {};
     
     // The monster !
     var monster = {
-	x:10,
-	y:10,
-	speed:1
+	x:250,
+	y:485,
+	width:50,
+	height:50,
+	speed:10 // pixels/s this time !
+    };
+    
+    // array of balls to animate
+    var ballArray = [];
+    
+    // We want the rectangle to move at speed pixels/s (there are 60 frames in a second)
+    // If we are really running at 60 frames/s, the delay between frames should be 1/60
+    // = 16.66 ms, so the number of pixels to move = (speed * del)/1000. If the delay is twice
+    // longer, the formula works : let's move the rectangle twice longer!
+    var calcDistanceToMove = function(delta, speed) {
+	//console.log("#delta = " + delta + " speed = " + speed);
+	return (speed * delta) / 1000; 
     };
     
     var measureFPS = function(newTime){
@@ -56,9 +75,6 @@ var GF = function(){
     
     // Functions for drawing the monster and maybe other objects
     function drawMyMonster(x, y) {
-	// draw a big monster !
-	// head
-	
 	// save the context
 	ctx.save();
 	
@@ -66,82 +82,142 @@ var GF = function(){
 	ctx.translate(x, y);
 	
 	// (0, 0) is the top left corner of the monster.
-	ctx.strokeRect(0, 0, 100, 100);
-	
-	// eyes
-	ctx.fillRect(20, 20, 10, 10);
-	ctx.fillRect(65, 20, 10, 10);
-	
-	// nose
-	ctx.strokeRect(45, 40, 10, 40);
-	
-	// mouth
-	ctx.strokeRect(35, 84, 30, 10);
-	
-	// teeth
-	ctx.fillRect(38, 84, 10, 10);
-	ctx.fillRect(52, 84, 10, 10);
+	ctx.beginPath();
+	ctx.arc(0, 0, 20, 0, 2 * Math.PI);
+	ctx.stroke();
 	
 	// restore the context
 	ctx.restore(); 
     }
     
+    function timer(currentTime) {
+	var delta = currentTime - oldTime;
+	oldTime = currentTime;
+	return delta;
+	
+    }
     var mainLoop = function(time){
         //main function, called each frame 
         measureFPS(time);
 	
+        // number of ms since last frame draw
+        delta = timer(time);
+	
         // Clear the canvas
         clearCanvas();
-        
+	
         // draw the monster
         drawMyMonster(monster.x, monster.y);
 	
         // Check inputs and move the monster
-        updateMonsterPosition();
+        updateMonsterPosition(delta);
+	
+        // update and draw balls
+        updateBalls(delta);
+
+	//Add new balls if there are less than 5
+	createBalls();
+
+	seconds += 1 % 1000;
 	
         // call the animation loop every 1/60th of second
         requestAnimationFrame(mainLoop);
     };
     
 
-    function updateMonsterPosition() {
+    function updateMonsterPosition(delta) {
 	monster.speedX = monster.speedY = 0;
         // check inputStates
         if (inputStates.left) {
-            ctx.fillText("left", 150, 20);
             monster.speedX = -monster.speed;
         }
         if (inputStates.up) {
-            ctx.fillText("up", 150, 40);
             monster.speedY = -monster.speed;
         }
 	if (inputStates.right) {
-            ctx.fillText("right", 150, 60);
             monster.speedX = monster.speed;
         }
         if (inputStates.down) {
-            ctx.fillText("down", 150, 80);
             monster.speedY = monster.speed;
         } 
         if (inputStates.space) {
-            ctx.fillText("space bar", 140, 100);
         }
         if (inputStates.mousePos) { 
-            ctx.fillText("x = " + inputStates.mousePos.x + " y = " + inputStates.mousePos.y, 5, 150);
         }
 	if (inputStates.mousedown) { 
-            ctx.fillText("mousedown b" + inputStates.mouseButton, 5, 180);
-            monster.speed = 5;
+            monster.speed = 500;
         } else {
             // mouse up
-            monster.speed = 1;
+            monster.speed = 100;
         }
 	
-        monster.x += monster.speedX;
-        monster.y += monster.speedY;
-	
+        // COmpute the incX and inY in pixels depending
+        // on the time elasped since last redraw
+        monster.x += calcDistanceToMove(delta, monster.speedX);
+        monster.y += calcDistanceToMove(delta, monster.speedY);
     }
     
+    function updateBalls(delta) {
+	// for each ball in the array
+	for(var i=0; i < ballArray.length; i++) {
+	    var ball = ballArray[i];
+	    
+	    // 1) move the ball
+	    ball.move();   
+	    
+	    // 2) test if the ball collides with a wall
+	    testCollisionWithWalls(ball);
+
+	    // Test if the monster collides
+	    if(circRectsOverlap(monster.x, monster.y, 
+				monster.width, monster.height, 
+				ball.x, ball.y, ball.radius)) {
+                
+		//change the color of the ball
+		ball.color = 'red';
+	    }
+	    
+	    // 3) draw the ball
+	    ball.draw();
+	}
+    } 
+    
+    // Collisions between rectangle and circle
+    function circRectsOverlap(x0, y0, w0, h0, cx, cy, r) {
+        var testX=cx; 
+        var testY=cy; 
+        
+        if (testX < x0) testX=x0; 
+        if (testX > (x0+w0)) testX=(x0+w0); 
+        if (testY < y0) testY=y0; 
+        if (testY > (y0+h0)) testY=(y0+h0); 
+	
+        return (((cx-testX)*(cx-testX)+(cy-testY)*(cy-testY))<r*r); 
+    }
+
+    
+    function testCollisionWithWalls(ball) {
+	// left
+	if (ball.x < ball.radius) {
+            ball.x = ball.radius;
+            ball.angle = -ball.angle + Math.PI;
+	} 
+	// right
+	if (ball.x > w - (ball.radius)) {
+            ball.x = w - (ball.radius);
+            ball.angle = -ball.angle + Math.PI; 
+	}     
+	// up
+	if (ball.y < ball.radius) {
+            ball.y = ball.radius;
+            ball.angle = -ball.angle;     
+	}     
+	// down
+	if (ball.y > h - (ball.radius)) {
+            ball.y = h - (ball.radius);
+            ball.angle =-ball.angle; 
+	} 
+    }
     
     function getMousePos(evt) {
         // necessary to take into account CSS boudaries
@@ -151,6 +227,53 @@ var GF = function(){
             y: evt.clientY - rect.top
         };
     }
+    
+    function createBalls() {
+	if(ballArray.length < 5){
+	    var ball =  new Ball(0.9 * w,
+				 0,
+				 (Math.PI) + (Math.PI / 2) * Math.random(),        				              (80*Math.random()),
+				 30);
+	    // On la rajoute au tableau
+	    ballArray.push(ball);
+	}
+    }                                
+
+    // constructor function for balls
+    function Ball(x, y, angle, v, diameter) {
+	this.x = x;
+	this.y = y;
+	this.angle = angle;
+	this.v = v;
+	this.radius = diameter/2;
+	this.color = 'black';
+	this.gravity = 1;
+
+	
+	this.draw = function() {
+	    ctx.save();
+	    ctx.beginPath();
+	    ctx.fillStyle = this.color;
+	    ctx.arc(this.x, this.y, this.radius, 0, 2*Math.PI);
+	    ctx.fill();
+	    ctx.restore();
+	    this.color = 'black';
+	};
+	
+	this.move = function() {
+	    this.gravity += this.gravity < 50 && seconds === 60? 10: 0;
+
+	    // add horizontal increment to the x pos
+	    // add vertical increment to the y pos
+	    
+	    var incX = this.v * Math.cos(this.angle);
+	    var incY = this.v * Math.sin(this.angle);
+	    
+	    this.x += calcDistanceToMove(delta, incX);
+	    this.y = this.y + calcDistanceToMove(delta , incY) + this.gravity;
+	};
+    }
+
     
     var start = function(){
         // adds a div for displaying the fps value
@@ -213,6 +336,8 @@ var GF = function(){
             inputStates.mousedown = false;
 	}, false);      
 
+        // We create tge balls: try to change the parameter
+        createBalls(); 
 
         // start the animation
         requestAnimationFrame(mainLoop);
@@ -223,4 +348,5 @@ var GF = function(){
         start: start
     };
 };
+
 
