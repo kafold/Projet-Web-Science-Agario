@@ -26,6 +26,7 @@ var GF = function(){
     
     // The monster !
     var monster = {};
+    var monster2 = {};
 
     // On renvoie un nombre aléatoire entre une valeur min (incluse)
     // et une valeur max (exclue)
@@ -107,7 +108,8 @@ var GF = function(){
         clearCanvas();
 	
         // draw the monster
-        drawMyMonster(monster.x, monster.y);
+        drawMyMonster(monster.x, monster.y)
+        drawMyMonster(monster2.x, monster2.y);
 	
         // Check inputs and move the monster
         updateMonsterPosition(delta);
@@ -296,7 +298,12 @@ var GF = function(){
         monster.height = 50;
         monster.x = getRandomArbitrary(monster.width,w - monster.width);
         monster.y = getRandomArbitrary(monster.height,h - monster.height);
-        monster.speed = 10; // pixels/s this time !
+        monster.speed = 10; // pixels/
+        monster2.width = 50;
+        monster2.height = 50;
+        monster2.x = getRandomArbitrary(monster.width,w - monster.width);
+        monster2.y = getRandomArbitrary(monster.height,h - monster.height);
+        monster2.speed = 10; // pixels/s this time !
 	
 	//add the listener to the main, window object, and update the states
 	window.addEventListener('keydown', function(event){
