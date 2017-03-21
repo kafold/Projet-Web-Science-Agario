@@ -28,8 +28,10 @@ var GF = function(){
     var monster = {
 	x:250,
 	y:485,
+	r:10,
 	width:50,
 	height:50,
+	color:'blue',
 	speed:10 // pixels/s this time !
     };
     
@@ -80,10 +82,12 @@ var GF = function(){
 	
 	// translate the coordinate system, draw relative to it
 	ctx.translate(x, y);
-	
+
+	ctx.fillStyle = monster.color;
 	// (0, 0) is the top left corner of the monster.
 	ctx.beginPath();
-	ctx.arc(0, 0, 20, 0, 2 * Math.PI);
+	ctx.arc(monster.r,monster.r , monster.r, 0, 2 * Math.PI);
+	ctx.fill();
 	ctx.stroke();
 	
 	// restore the context
@@ -118,48 +122,64 @@ var GF = function(){
 	//Add new balls if there are less than 5
 	createBalls();
 
-	seconds += 1 % 1000;
+	seconds = (seconds + 1) % 61;
 	
-        // call the animation loop every 1/60th of second
-        requestAnimationFrame(mainLoop);
+	// call the animation loop every 1/60th of second
+	requestAnimationFrame(mainLoop);
     };
+
+    function circleCollide(x1, y1, r1, x2, y2, r2) {
+	var dx = x1 - x2;
+	var dy = y1 - y2;
+	return ((dx * dx + dy * dy) < (r1 + r2)*(r1+r2));
+    }
     
+    // Collisions between rectangle and circle
+    function circRectsOverlap(x0, y0, w0, h0, cx, cy, r) {
+	var testX=cx;
+	var testY=cy;
+	if (testX < x0) testX=x0;
+	if (testX > (x0+w0)) testX=(x0+w0);
+	if (testY < y0) testY=y0;
+	if (testY > (y0+h0)) testY=(y0+h0);
+	return (((cx-testX)*(cx-testX)+(cy-testY)*(cy-testY))< r*r);
+    }
 
     function updateMonsterPosition(delta) {
 	monster.speedX = monster.speedY = 0;
-        // check inputStates
-        if (inputStates.left) {
-            monster.speedX = -monster.speed;
-        }
-        if (inputStates.up) {
-            monster.speedY = -monster.speed;
-        }
+	// check inputStates
+	if (inputStates.left) {
+	    monster.speedX = -monster.speed;
+	}
+	if (inputStates.up) {
+	    monster.speedY = -monster.speed;
+	}
 	if (inputStates.right) {
-            monster.speedX = monster.speed;
-        }
-        if (inputStates.down) {
-            monster.speedY = monster.speed;
-        } 
-        if (inputStates.space) {
-        }
-        if (inputStates.mousePos) { 
-        }
+	    monster.speedX = monster.speed;
+	}
+	if (inputStates.down) {
+	    monster.speedY = monster.speed;
+	} 
+	if (inputStates.space) {
+	}
+	if (inputStates.mousePos) { 
+	}
 	if (inputStates.mousedown) { 
-            monster.speed = 500;
-        } else {
-            // mouse up
-            monster.speed = 100;
-        }
+	    monster.speed = 500;
+	} else {
+	    // mouse up
+	    monster.speed = 100;
+	}
 	
-        // COmpute the incX and inY in pixels depending
-        // on the time elasped since last redraw
-        monster.x += calcDistanceToMove(delta, monster.speedX);
-        monster.y += calcDistanceToMove(delta, monster.speedY);
+	// Compute the incX and inY in pixels depending
+	// on the time elasped since last redraw
+	monster.x += calcDistanceToMove(delta, monster.speedX);
+	monster.y += calcDistanceToMove(delta, monster.speedY);
     }
-    
+
     function updateBalls(delta) {
 	// for each ball in the array
-	for(var i=0; i < ballArray.length; i++) {
+	for(var i=ballArray.length - 1; i >= 0; i--) {
 	    var ball = ballArray[i];
 	    
 	    // 1) move the ball
@@ -169,65 +189,49 @@ var GF = function(){
 	    testCollisionWithWalls(ball);
 
 	    // Test if the monster collides
-	    if(circRectsOverlap(monster.x, monster.y, 
-				monster.width, monster.height, 
-				ball.x, ball.y, ball.radius)) {
-                
-		//change the color of the ball
-		ball.color = 'red';
+	    if(circleCollide(monster.x + monster.r, monster.y + monster.r, monster.r,
+			     ball.x, ball.y, ball.radius)) {
+		ballArray.slice(i, 1);
+		monster.r += 10;
 	    }
 	    
 	    // 3) draw the ball
 	    ball.draw();
 	}
     } 
-    
-    // Collisions between rectangle and circle
-    function circRectsOverlap(x0, y0, w0, h0, cx, cy, r) {
-        var testX=cx; 
-        var testY=cy; 
-        
-        if (testX < x0) testX=x0; 
-        if (testX > (x0+w0)) testX=(x0+w0); 
-        if (testY < y0) testY=y0; 
-        if (testY > (y0+h0)) testY=(y0+h0); 
-	
-        return (((cx-testX)*(cx-testX)+(cy-testY)*(cy-testY))<r*r); 
-    }
 
-    
     function testCollisionWithWalls(ball) {
 	// left
 	if (ball.x < ball.radius) {
-            ball.x = ball.radius;
-            ball.angle = -ball.angle + Math.PI;
+	    ball.x = ball.radius;
+	    ball.angle = -ball.angle + Math.PI;
 	} 
 	// right
 	if (ball.x > w - (ball.radius)) {
-            ball.x = w - (ball.radius);
-            ball.angle = -ball.angle + Math.PI; 
+	    ball.x = w - (ball.radius);
+	    ball.angle = -ball.angle + Math.PI; 
 	}     
 	// up
 	if (ball.y < ball.radius) {
-            ball.y = ball.radius;
-            ball.angle = -ball.angle;     
+	    ball.y = ball.radius;
+	    ball.angle = -ball.angle;     
 	}     
 	// down
 	if (ball.y > h - (ball.radius)) {
-            ball.y = h - (ball.radius);
-            ball.angle =-ball.angle; 
+	    ball.y = h - (ball.radius);
+	    ball.angle =-ball.angle; 
 	} 
     }
-    
+
     function getMousePos(evt) {
-        // necessary to take into account CSS boudaries
-        var rect = canvas.getBoundingClientRect();
-        return {
-            x: evt.clientX - rect.left,
-            y: evt.clientY - rect.top
-        };
+	// necessary to take into account CSS boudaries
+	var rect = canvas.getBoundingClientRect();
+	return {
+	    x: evt.clientX - rect.left,
+	    y: evt.clientY - rect.top
+	};
     }
-    
+
     function createBalls() {
 	if(ballArray.length < 5){
 	    var ball =  new Ball(0.9 * w,
@@ -247,8 +251,6 @@ var GF = function(){
 	this.v = v;
 	this.radius = diameter/2;
 	this.color = 'black';
-	this.gravity = 1;
-
 	
 	this.draw = function() {
 	    ctx.save();
@@ -261,8 +263,6 @@ var GF = function(){
 	};
 	
 	this.move = function() {
-	    this.gravity += this.gravity < 50 && seconds === 60? 10: 0;
-
 	    // add horizontal increment to the x pos
 	    // add vertical increment to the y pos
 	    
@@ -270,7 +270,7 @@ var GF = function(){
 	    var incY = this.v * Math.sin(this.angle);
 	    
 	    this.x += calcDistanceToMove(delta, incX);
-	    this.y = this.y + calcDistanceToMove(delta , incY) + this.gravity;
+	    this.y += calcDistanceToMove(delta , incY);
 	};
     }
 
@@ -294,46 +294,46 @@ var GF = function(){
 	
 	//add the listener to the main, window object, and update the states
 	window.addEventListener('keydown', function(event){
-            if (event.keyCode === 37) {
+	    if (event.keyCode === 37) {
 		inputStates.left = true;
-            } else if (event.keyCode === 38) {
+	    } else if (event.keyCode === 38) {
 		inputStates.up = true;
-            } else if (event.keyCode === 39) {
+	    } else if (event.keyCode === 39) {
 		inputStates.right = true;
-            } else if (event.keyCode === 40) {
+	    } else if (event.keyCode === 40) {
 		inputStates.down = true;
-            }  else if (event.keyCode === 32) {
+	    }  else if (event.keyCode === 32) {
 		inputStates.space = true;
-            }
+	    }
 	}, false);
 
 	//if the key will be released, change the states object 
 	window.addEventListener('keyup', function(event){
-            if (event.keyCode === 37) {
+	    if (event.keyCode === 37) {
 		inputStates.left = false;
-            } else if (event.keyCode === 38) {
+	    } else if (event.keyCode === 38) {
 		inputStates.up = false;
-            } else if (event.keyCode === 39) {
+	    } else if (event.keyCode === 39) {
 		inputStates.right = false;
-            } else if (event.keyCode === 40) {
+	    } else if (event.keyCode === 40) {
 		inputStates.down = false;
-            } else if (event.keyCode === 32) {
+	    } else if (event.keyCode === 32) {
 		inputStates.space = false;
-            }
+	    }
 	}, false);
 	
 	// Mouse event listeners
 	canvas.addEventListener('mousemove', function (evt) {
-            inputStates.mousePos = getMousePos(evt);
+	    inputStates.mousePos = getMousePos(evt);
 	}, false);
 
 	canvas.addEventListener('mousedown', function (evt) {
-            inputStates.mousedown = true;
-            inputStates.mouseButton = evt.button;
+	    inputStates.mousedown = true;
+	    inputStates.mouseButton = evt.button;
 	}, false);
 
 	canvas.addEventListener('mouseup', function (evt) {
-            inputStates.mousedown = false;
+	    inputStates.mousedown = false;
 	}, false);      
 
         // We create tge balls: try to change the parameter
