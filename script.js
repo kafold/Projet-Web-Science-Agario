@@ -128,7 +128,7 @@ var GF = function(){
     
 
     function updateMonsterPosition(delta) {
-	monster.speedX = monster.speedY = 0;
+	    monster.speedX = monster.speedY = 0;
         // check inputStates
         if (inputStates.left) {
             monster.speedX = -monster.speed;
@@ -136,7 +136,7 @@ var GF = function(){
         if (inputStates.up) {
             monster.speedY = -monster.speed;
         }
-	if (inputStates.right) {
+	    if (inputStates.right) {
             monster.speedX = monster.speed;
         }
         if (inputStates.down) {
@@ -146,17 +146,40 @@ var GF = function(){
         }
         if (inputStates.mousePos) { 
         }
-	if (inputStates.mousedown) { 
+	    if (inputStates.mousedown) {
             monster.speed = 500;
         } else {
             // mouse up
             monster.speed = 100;
+        }
+        monster2.speedX = monster2.speedY = 0;
+        // check inputStates
+        if (inputStates.keyDownA) {
+            monster2.speedX = -monster2.speed;
+        }
+        if (inputStates.keyDownZ) {
+            monster2.speedY = -monster2.speed;
+        }
+        if (inputStates.keyDownE) {
+            monster2.speedX = monster2.speed;
+        }
+        if (inputStates.keyDownS) {
+            monster2.speedY = monster2.speed;
+        }
+        if (inputStates.mousedown) {
+            monster2.speed = 500;
+        } else {
+            // mouse up
+            monster2.speed = 100;
         }
 	
         // COmpute the incX and inY in pixels depending
         // on the time elasped since last redraw
         monster.x += calcDistanceToMove(delta, monster.speedX);
         monster.y += calcDistanceToMove(delta, monster.speedY);
+
+        monster2.x += calcDistanceToMove(delta, monster2.speedX);
+        monster2.y += calcDistanceToMove(delta, monster2.speedY);
     }
     
     function updateBalls(delta) {
@@ -307,17 +330,32 @@ var GF = function(){
 	
 	//add the listener to the main, window object, and update the states
 	window.addEventListener('keydown', function(event){
-            if (event.keyCode === 37) {
-		inputStates.left = true;
-            } else if (event.keyCode === 38) {
-		inputStates.up = true;
-            } else if (event.keyCode === 39) {
-		inputStates.right = true;
-            } else if (event.keyCode === 40) {
-		inputStates.down = true;
-            }  else if (event.keyCode === 32) {
-		inputStates.space = true;
-            }
+        if (event.keyCode === 37) {
+		    inputStates.left = true;
+        } else if (event.keyCode === 38) {
+		    inputStates.up = true;
+        } else if (event.keyCode === 39) {
+		    inputStates.right = true;
+        } else if (event.keyCode === 40) {
+		    inputStates.down = true;
+        }  else if (event.keyCode === 32) {
+            inputStates.space = true;
+        }
+        else if(event.keyCode == 18){
+            inputStates.keyDownQ = true;
+        }
+        else if(event.keyCode == 65){
+            inputStates.keyDownA = true;
+        }
+        else if(event.keyCode == 90){
+            inputStates.keyDownZ = true;
+        }
+        else if(event.keyCode == 69){
+            inputStates.keyDownE = true;
+        }
+        else if(event.keyCode == 83){
+            inputStates.keyDownS = true;
+        }
 	}, false);
 
 	//if the key will be released, change the states object 
@@ -332,6 +370,20 @@ var GF = function(){
 		inputStates.down = false;
             } else if (event.keyCode === 32) {
 		inputStates.space = false;
+            }else if(event.keyCode == 18){
+                inputStates.keyDownQ = false;
+            }
+            else if(event.keyCode == 65){
+                inputStates.keyDownA = false;
+            }
+            else if(event.keyCode == 90){
+                inputStates.keyDownZ = false;
+            }
+            else if(event.keyCode == 69){
+                inputStates.keyDownE = false;
+            }
+            else if(event.keyCode == 83){
+                inputStates.keyDownS = false;
             }
 	}, false);
 	
