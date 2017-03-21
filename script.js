@@ -25,15 +25,14 @@ var GF = function(){
     var inputStates = {};
     
     // The monster !
-    var monster = {
-	x:250,
-	y:485,
-	r:10,
-	width:50,
-	height:50,
-	color:'blue',
-	speed:10 // pixels/s this time !
-    };
+    var monster = {};
+    var monster2 = {};
+
+    // On renvoie un nombre aléatoire entre une valeur min (incluse)
+    // et une valeur max (exclue)
+    function getRandomArbitrary(min, max) {
+        return Math.random() * (max - min) + min;
+    }
     
     // array of balls to animate
     var ballArray = [];
@@ -76,17 +75,17 @@ var GF = function(){
     }
     
     // Functions for drawing the monster and maybe other objects
-    function drawMyMonster(x, y) {
+    function drawMyMonster(x, y, color, rayon) {
 	// save the context
 	ctx.save();
 	
 	// translate the coordinate system, draw relative to it
 	ctx.translate(x, y);
 
-	ctx.fillStyle = monster.color;
+	ctx.fillStyle = color;
 	// (0, 0) is the top left corner of the monster.
 	ctx.beginPath();
-	ctx.arc(monster.r,monster.r , monster.r, 0, 2 * Math.PI);
+	ctx.arc(rayon,rayon , rayon, 0, 2 * Math.PI);
 	ctx.fill();
 	ctx.stroke();
 	
@@ -111,7 +110,8 @@ var GF = function(){
         clearCanvas();
 	
         // draw the monster
-        drawMyMonster(monster.x, monster.y);
+        drawMyMonster(monster.x, monster.y, monster.color, monster.r);
+        drawMyMonster(monster2.x, monster2.y, monster.color, monster.r);
 	
         // Check inputs and move the monster
         updateMonsterPosition(delta);
@@ -133,7 +133,7 @@ var GF = function(){
 	var dy = y1 - y2;
 	return ((dx * dx + dy * dy) < (r1 + r2)*(r1+r2));
     }
-    
+
     // Collisions between rectangle and circle
     function circRectsOverlap(x0, y0, w0, h0, cx, cy, r) {
 	var testX=cx;
@@ -146,35 +146,58 @@ var GF = function(){
     }
 
     function updateMonsterPosition(delta) {
-	monster.speedX = monster.speedY = 0;
-	// check inputStates
-	if (inputStates.left) {
-	    monster.speedX = -monster.speed;
-	}
-	if (inputStates.up) {
-	    monster.speedY = -monster.speed;
-	}
-	if (inputStates.right) {
-	    monster.speedX = monster.speed;
-	}
-	if (inputStates.down) {
-	    monster.speedY = monster.speed;
-	} 
-	if (inputStates.space) {
-	}
-	if (inputStates.mousePos) { 
-	}
-	if (inputStates.mousedown) { 
-	    monster.speed = 500;
-	} else {
-	    // mouse up
-	    monster.speed = 100;
-	}
+	    monster.speedX = monster.speedY = 0;
+        // check inputStates
+        if (inputStates.left) {
+            monster.speedX = -monster.speed;
+        }
+        if (inputStates.up) {
+            monster.speedY = -monster.speed;
+        }
+	    if (inputStates.right) {
+            monster.speedX = monster.speed;
+        }
+        if (inputStates.down) {
+            monster.speedY = monster.speed;
+        }
+        if (inputStates.space) {
+        }
+        if (inputStates.mousePos) {
+        }
+	    if (inputStates.mousedown) {
+            monster.speed = 500;
+        } else {
+            // mouse up
+            monster.speed = 100;
+        }
+        monster2.speedX = monster2.speedY = 0;
+        // check inputStates
+        if (inputStates.keyDownA) {
+            monster2.speedX = -monster2.speed;
+        }
+        if (inputStates.keyDownZ) {
+            monster2.speedY = -monster2.speed;
+        }
+        if (inputStates.keyDownE) {
+            monster2.speedX = monster2.speed;
+        }
+        if (inputStates.keyDownS) {
+            monster2.speedY = monster2.speed;
+        }
+        if (inputStates.mousedown) {
+            monster2.speed = 500;
+        } else {
+            // mouse up
+            monster2.speed = 100;
+        }
 	
-	// Compute the incX and inY in pixels depending
-	// on the time elasped since last redraw
-	monster.x += calcDistanceToMove(delta, monster.speedX);
-	monster.y += calcDistanceToMove(delta, monster.speedY);
+        // COmpute the incX and inY in pixels depending
+        // on the time elasped since last redraw
+        monster.x += calcDistanceToMove(delta, monster.speedX);
+        monster.y += calcDistanceToMove(delta, monster.speedY);
+
+        monster2.x += calcDistanceToMove(delta, monster2.speedX);
+        monster2.y += calcDistanceToMove(delta, monster2.speedY);
     }
 
     function updateBalls(delta) {
@@ -198,7 +221,7 @@ var GF = function(){
 	    // 3) draw the ball
 	    ball.draw();
 	}
-    } 
+    }
 
     function testCollisionWithWalls(ball) {
 	// left
@@ -209,17 +232,17 @@ var GF = function(){
 	// right
 	if (ball.x > w - (ball.radius)) {
 	    ball.x = w - (ball.radius);
-	    ball.angle = -ball.angle + Math.PI; 
+	    ball.angle = -ball.angle + Math.PI;
 	}     
 	// up
 	if (ball.y < ball.radius) {
 	    ball.y = ball.radius;
-	    ball.angle = -ball.angle;     
+	    ball.angle = -ball.angle;
 	}     
 	// down
 	if (ball.y > h - (ball.radius)) {
 	    ball.y = h - (ball.radius);
-	    ball.angle =-ball.angle; 
+	    ball.angle =-ball.angle;
 	} 
     }
 
@@ -236,7 +259,7 @@ var GF = function(){
 	if(ballArray.length < 5){
 	    var ball =  new Ball(0.9 * w,
 				 0,
-				 (Math.PI) + (Math.PI / 2) * Math.random(),        				              (80*Math.random()),
+				 (Math.PI) + (Math.PI / 2) * Math.random(),(80*Math.random()),
 				 30);
 	    // On la rajoute au tableau
 	    ballArray.push(ball);
@@ -291,20 +314,50 @@ var GF = function(){
         ctx = canvas.getContext('2d');
         // default police for text
         ctx.font="20px Arial";
-	
+
+        monster.width = 50;
+        monster.height = 50;
+        monster.x = getRandomArbitrary(monster.width,w - monster.width);
+        monster.y = getRandomArbitrary(monster.height,h - monster.height);
+        monster.r = 3;
+        monster.speed = 10; // pixels/
+        monster.color = 'blue';
+        monster2.width = 50;
+        monster2.height = 50;
+        monster2.x = getRandomArbitrary(monster.width,w - monster.width);
+        monster2.y = getRandomArbitrary(monster.height,h - monster.height);
+        monster2.speed = 10; // pixels/
+        monster2.color = 'red';
+        monster2.r = 3;
+
 	//add the listener to the main, window object, and update the states
 	window.addEventListener('keydown', function(event){
-	    if (event.keyCode === 37) {
-		inputStates.left = true;
-	    } else if (event.keyCode === 38) {
-		inputStates.up = true;
-	    } else if (event.keyCode === 39) {
-		inputStates.right = true;
-	    } else if (event.keyCode === 40) {
-		inputStates.down = true;
-	    }  else if (event.keyCode === 32) {
-		inputStates.space = true;
-	    }
+        if (event.keyCode === 37) {
+		    inputStates.left = true;
+        } else if (event.keyCode === 38) {
+		    inputStates.up = true;
+        } else if (event.keyCode === 39) {
+		    inputStates.right = true;
+        } else if (event.keyCode === 40) {
+		    inputStates.down = true;
+        }  else if (event.keyCode === 32) {
+            inputStates.space = true;
+        }
+        else if(event.keyCode == 18){
+            inputStates.keyDownQ = true;
+        }
+        else if(event.keyCode == 65){
+            inputStates.keyDownA = true;
+        }
+        else if(event.keyCode == 90){
+            inputStates.keyDownZ = true;
+        }
+        else if(event.keyCode == 69){
+            inputStates.keyDownE = true;
+        }
+        else if(event.keyCode == 83){
+            inputStates.keyDownS = true;
+        }
 	}, false);
 
 	//if the key will be released, change the states object 
@@ -319,7 +372,21 @@ var GF = function(){
 		inputStates.down = false;
 	    } else if (event.keyCode === 32) {
 		inputStates.space = false;
-	    }
+            }else if(event.keyCode == 18){
+                inputStates.keyDownQ = false;
+            }
+            else if(event.keyCode == 65){
+                inputStates.keyDownA = false;
+            }
+            else if(event.keyCode == 90){
+                inputStates.keyDownZ = false;
+            }
+            else if(event.keyCode == 69){
+                inputStates.keyDownE = false;
+            }
+            else if(event.keyCode == 83){
+                inputStates.keyDownS = false;
+            }
 	}, false);
 	
 	// Mouse event listeners
