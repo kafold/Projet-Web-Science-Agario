@@ -93,22 +93,38 @@ var GF = function(){
             ctx.fillText("left", 150, 20);
         }
         if (inputStates.up) {
-            ctx.fillText("up", 150, 50);
+            ctx.fillText("up", 150, 40);
         }
 	if (inputStates.right) {
-            ctx.fillText("right", 150, 80);
+            ctx.fillText("right", 150, 60);
         }
         if (inputStates.down) {
-            ctx.fillText("down", 150, 120);
+            ctx.fillText("down", 150, 80);
         } 
         if (inputStates.space) {
-            ctx.fillText("space bar", 140, 150);
-        } 
+            ctx.fillText("space bar", 140, 100);
+        }
+        if (inputStates.mousePos) { 
+            ctx.fillText("x = " + inputStates.mousePos.x + " y = " + inputStates.mousePos.y, 5, 150);
+        }
+	if (inputStates.mousedown) { 
+            ctx.fillText("mousedown b" + inputStates.mouseButton, 5, 180);
+        }
 	
         // call the animation loop every 1/60th of second
         requestAnimationFrame(mainLoop);
     };
+    
 
+    function getMousePos(evt) {
+        // necessary to take into account CSS boudaries
+        var rect = canvas.getBoundingClientRect();
+        return {
+            x: evt.clientX - rect.left,
+            y: evt.clientY - rect.top
+        };
+    }
+    
     var start = function(){
         // adds a div for displaying the fps value
         fpsContainer = document.createElement('div');
@@ -155,6 +171,20 @@ var GF = function(){
 		inputStates.space = false;
             }
 	}, false);
+	
+	// Mouse event listeners
+	canvas.addEventListener('mousemove', function (evt) {
+            inputStates.mousePos = getMousePos(evt);
+	}, false);
+
+	canvas.addEventListener('mousedown', function (evt) {
+            inputStates.mousedown = true;
+            inputStates.mouseButton = evt.button;
+	}, false);
+
+	canvas.addEventListener('mouseup', function (evt) {
+            inputStates.mousedown = false;
+	}, false);      
 
 
         // start the animation
@@ -166,3 +196,4 @@ var GF = function(){
         start: start
     };
 };
+
