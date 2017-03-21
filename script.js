@@ -25,13 +25,13 @@ var GF = function(){
     var inputStates = {};
     
     // The monster !
-    var monster = {
-	x:250,
-	y:485,
-	width:50,
-	height:50,
-	speed:10 // pixels/s this time !
-    };
+    var monster = {};
+
+    // On renvoie un nombre aléatoire entre une valeur min (incluse)
+    // et une valeur max (exclue)
+    function getRandomArbitrary(min, max) {
+        return Math.random() * (max - min) + min;
+    }
     
     // array of balls to animate
     var ballArray = [];
@@ -291,6 +291,12 @@ var GF = function(){
         ctx = canvas.getContext('2d');
         // default police for text
         ctx.font="20px Arial";
+
+        monster.width = 50;
+        monster.height = 50;
+        monster.x = getRandomArbitrary(monster.width,w - monster.width);
+        monster.y = getRandomArbitrary(monster.height,h - monster.height);
+        monster.speed = 10; // pixels/s this time !
 	
 	//add the listener to the main, window object, and update the states
 	window.addEventListener('keydown', function(event){
