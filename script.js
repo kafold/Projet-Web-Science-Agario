@@ -16,6 +16,9 @@ var GF = function(){
     var fpsContainer;
     var fps; 
     
+    // vars for handling inputs
+    var inputStates = {};
+    
     var measureFPS = function(newTime){
 	
         // test for the very first invocation
@@ -85,6 +88,22 @@ var GF = function(){
         
         // draw the monster
         drawMyMonster(10+Math.random()*10, 10+Math.random()*10);
+        // check inputStates
+        if (inputStates.left) {
+            ctx.fillText("left", 150, 20);
+        }
+        if (inputStates.up) {
+            ctx.fillText("up", 150, 50);
+        }
+	if (inputStates.right) {
+            ctx.fillText("right", 150, 80);
+        }
+        if (inputStates.down) {
+            ctx.fillText("down", 150, 120);
+        } 
+        if (inputStates.space) {
+            ctx.fillText("space bar", 140, 150);
+        } 
 	
         // call the animation loop every 1/60th of second
         requestAnimationFrame(mainLoop);
@@ -104,6 +123,39 @@ var GF = function(){
 	
         // important, we will draw with this object
         ctx = canvas.getContext('2d');
+        // default police for text
+        ctx.font="20px Arial";
+	
+	//add the listener to the main, window object, and update the states
+	window.addEventListener('keydown', function(event){
+            if (event.keyCode === 37) {
+		inputStates.left = true;
+            } else if (event.keyCode === 38) {
+		inputStates.up = true;
+            } else if (event.keyCode === 39) {
+		inputStates.right = true;
+            } else if (event.keyCode === 40) {
+		inputStates.down = true;
+            }  else if (event.keyCode === 32) {
+		inputStates.space = true;
+            }
+	}, false);
+
+	//if the key will be released, change the states object 
+	window.addEventListener('keyup', function(event){
+            if (event.keyCode === 37) {
+		inputStates.left = false;
+            } else if (event.keyCode === 38) {
+		inputStates.up = false;
+            } else if (event.keyCode === 39) {
+		inputStates.right = false;
+            } else if (event.keyCode === 40) {
+		inputStates.down = false;
+            } else if (event.keyCode === 32) {
+		inputStates.space = false;
+            }
+	}, false);
+
 
         // start the animation
         requestAnimationFrame(mainLoop);
