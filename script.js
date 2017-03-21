@@ -19,6 +19,13 @@ var GF = function(){
     // vars for handling inputs
     var inputStates = {};
     
+    // The monster !
+    var monster = {
+	x:10,
+	y:10,
+	speed:1
+    };
+    
     var measureFPS = function(newTime){
 	
         // test for the very first invocation
@@ -87,19 +94,34 @@ var GF = function(){
         clearCanvas();
         
         // draw the monster
-        drawMyMonster(10+Math.random()*10, 10+Math.random()*10);
+        drawMyMonster(monster.x, monster.y);
+	
+        // Check inputs and move the monster
+        updateMonsterPosition();
+	
+        // call the animation loop every 1/60th of second
+        requestAnimationFrame(mainLoop);
+    };
+    
+
+    function updateMonsterPosition() {
+	monster.speedX = monster.speedY = 0;
         // check inputStates
         if (inputStates.left) {
             ctx.fillText("left", 150, 20);
+            monster.speedX = -monster.speed;
         }
         if (inputStates.up) {
             ctx.fillText("up", 150, 40);
+            monster.speedY = -monster.speed;
         }
 	if (inputStates.right) {
             ctx.fillText("right", 150, 60);
+            monster.speedX = monster.speed;
         }
         if (inputStates.down) {
             ctx.fillText("down", 150, 80);
+            monster.speedY = monster.speed;
         } 
         if (inputStates.space) {
             ctx.fillText("space bar", 140, 100);
@@ -109,13 +131,18 @@ var GF = function(){
         }
 	if (inputStates.mousedown) { 
             ctx.fillText("mousedown b" + inputStates.mouseButton, 5, 180);
+            monster.speed = 5;
+        } else {
+            // mouse up
+            monster.speed = 1;
         }
 	
-        // call the animation loop every 1/60th of second
-        requestAnimationFrame(mainLoop);
-    };
+        monster.x += monster.speedX;
+        monster.y += monster.speedY;
+	
+    }
     
-
+    
     function getMousePos(evt) {
         // necessary to take into account CSS boudaries
         var rect = canvas.getBoundingClientRect();
