@@ -8,7 +8,12 @@ window.onload = function init() {
 // GAME FRAMEWORK STARTS HERE
 var GF = function(){
     // Vars relative to the canvas
-    var canvas, ctx, w, h; 
+    var canvas, ctx, w, h;
+
+    //Le nombre de balle mangé
+    var numberOfBalls = 0;
+    //Un element dans laquelle on va afficher les points
+    var point;
 
     // vars for counting frames/s, used by the measureFPS function
     var frameCount = 0;
@@ -126,6 +131,8 @@ var GF = function(){
 	
 	// call the animation loop every 1/60th of second
 	requestAnimationFrame(mainLoop);
+
+	point.innerHTML = numberOfBalls;
     };
 
     function circleCollide(x1, y1, r1, x2, y2, r2) {
@@ -179,7 +186,7 @@ var GF = function(){
 
     function updateBalls(delta) {
 	// for each ball in the array
-	for(var i=ballArray.length - 1; i >= 0; i--) {
+	for(var i=ballArray.length - 1; i >= 0; --i) {
 	    var ball = ballArray[i];
 	    
 	    // 1) move the ball
@@ -188,15 +195,16 @@ var GF = function(){
 	    // 2) test if the ball collides with a wall
 	    testCollisionWithWalls(ball);
 
+	    // 3) draw the ball
+	    ball.draw();
+	    
 	    // Test if the monster collides
 	    if(circleCollide(monster.x + monster.r, monster.y + monster.r, monster.r,
 			     ball.x, ball.y, ball.radius)) {
-		ballArray.slice(i, 1);
-		monster.r += 10;
+		ballArray.splice(i, 1);
+		numberOfBalls++;
+		monster.r += 0.5;
 	    }
-	    
-	    // 3) draw the ball
-	    ball.draw();
 	}
     } 
 
@@ -233,11 +241,12 @@ var GF = function(){
     }
 
     function createBalls() {
-	if(ballArray.length < 5){
-	    var ball =  new Ball(0.9 * w,
-				 0,
-				 (Math.PI) + (Math.PI / 2) * Math.random(),        				              (80*Math.random()),
-				 30);
+	if(ballArray.length < 5 && numberOfBalls < 100){
+	    var radius = 30;
+	    var ball =  new Ball(radius + Math.random() * (w - radius * 2),
+				 radius + Math.random() * (h - radius * 2),
+				 (2 * Math.PI) * Math.random(),        				                              (80*Math.random()),
+				 radius);
 	    // On la rajoute au tableau
 	    ballArray.push(ball);
 	}
@@ -276,20 +285,21 @@ var GF = function(){
 
     
     var start = function(){
-        // adds a div for displaying the fps value
-        fpsContainer = document.createElement('div');
-        document.body.appendChild(fpsContainer);
+	point = document.getElementById("point");
+	// adds a div for displaying the fps value
+	fpsContainer = document.createElement('div');
+	document.body.appendChild(fpsContainer);
 	
-        // Canvas, context etc.
-        canvas = document.querySelector("#myCanvas");
+	// Canvas, context etc.
+	canvas = document.querySelector("#myCanvas");
 	
-        // often useful
-        w = canvas.width; 
-        h = canvas.height;  
+	// often useful
+	w = canvas.width; 
+	h = canvas.height;  
 	
-        // important, we will draw with this object
-        ctx = canvas.getContext('2d');
-        // default police for text
+	// important, we will draw with this object
+	ctx = canvas.getContext('2d');
+	// default police for text
         ctx.font="20px Arial";
 	
 	//add the listener to the main, window object, and update the states
