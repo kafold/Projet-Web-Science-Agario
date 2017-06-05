@@ -5,7 +5,10 @@ window.onload = function init() {
 };
 
 
-// GAME FRAMEWORK STARTS HERE
+/*
+ * Le FRAMEWORK de notre jeu. Il suffit d'appeler la méthode start pour lancer le jeu.
+ *
+ */
 var GF = function(){
     // Vars relative to the canvas
     var canvas, ctx, w, h;
@@ -34,12 +37,6 @@ var GF = function(){
     // The monster !
     var monster = {};
     var monster2 = {};
-
-    // On renvoie un nombre aléatoire entre une valeur min (incluse)
-    // et une valeur max (exclue)
-    function getRandomArbitrary(min, max) {
-        return Math.random() * (max - min) + min;
-    }
 
     // array of balls to animate
     var ballArray = [];
@@ -106,6 +103,7 @@ var GF = function(){
         return delta;
 
     }
+
     var mainLoop = function(time){
         //main function, called each frame 
         measureFPS(time);
