@@ -34,21 +34,22 @@ var GF = function(){
     // vars for handling inputs
     var inputStates = {};
 
+    // TODO Erase
     // The monster !
-    var monster = {};
-    var monster2 = {};
+    //var monster = {};
+    //var monster2 = {};
+
+    //Balls global variable
+    var BALL_PLAYER_COLOR = 'blue';
+    var BALL_PLAYER_WIDTH = 50;
+    var BALL_PLAYER_HEIGHT = 50;
+    var BALL_PLAYER_RADIUS = 3;
+    var BALL_PLAYER_SPEED = 10; //pixels
 
     // array of balls to animate
     var ballArray = [];
 
-    // We want the rectangle to move at speed pixels/s (there are 60 frames in a second)
-    // If we are really running at 60 frames/s, the delay between frames should be 1/60
-    // = 16.66 ms, so the number of pixels to move = (speed * del)/1000. If the delay is twice
-    // longer, the formula works : let's move the rectangle twice longer!
-    var calcDistanceToMove = function(delta, speed) {
-        //console.log("#delta = " + delta + " speed = " + speed);
-        return (speed * delta) / 1000;
-    };
+
 
     var measureFPS = function(newTime){
 
@@ -114,6 +115,7 @@ var GF = function(){
         // Clear the canvas
         clearCanvas();
 
+        // TODO Remplacer par drawAllBalls
         // draw the monster
         drawMyMonster(monster.x, monster.y, monster.color, monster.r);
         drawMyMonster(monster2.x, monster2.y, monster.color, monster2.r);
@@ -125,7 +127,7 @@ var GF = function(){
         updateBalls(delta);
 
         //Add new balls if there are less than 5
-        createBalls();
+        createBalls(ballArray);
 
         seconds = (seconds + 1) % 61;
 
@@ -241,13 +243,14 @@ var GF = function(){
             var ball = ballArray[i];
 
             // 1) move the ball
-            ball.move();
+            ball.move(delta);
 
             // 2) test if the ball collides with a wall
             testCollisionWithWalls(ball);
 
+            //TODO remove draw here as it is drawn in main loop with all other balls
             // 3) draw the ball
-            ball.draw();
+            ball.draw(ctx);
 
             // Test if the monster collides
             if(circleCollide(monster.x + monster.r, monster.y + monster.r, monster.r,
@@ -297,50 +300,31 @@ var GF = function(){
         };
     }
 
-    function createBalls() {
-        if(ballArray.length < 5 && numberOfBalls1 < 100 && numberOfBalls2 < 100){
-            var radius = 30;
-            var ball =  new Ball(radius + Math.random() * (w - radius * 2),
-                radius + Math.random() * (h - radius * 2),
-                (2 * Math.PI) * Math.random(),
-                (80*Math.random()),
-                radius);
-            // On la rajoute au tableau
-            ballArray.push(ball);
+
+    function createPlayer(number, ballArray) {
+        var player;
+        var width;
+        var height;
+        var x;
+        var y;
+        var angle;
+        var diamater;
+        var speed;
+        var color;
+        for(var i = 1; i <= number; i++){
+            width = BALL_PLAYER_WIDTH;
+            height = BALL_PLAYER_HEIGHT;
+            x = getRandomArbitrary(width,w - width);
+            y = getRandomArbitrary(height,h - height);
+            angle = (2 * Math.PI) * Math.random();
+            diamater = BALL_PLAYER_RADIUS;
+            speed = BALL_PLAYER_SPEED;
+            color = BALL_PLAYER_SPEED;
+            player = new Ball("player" + i,x,y,angle,speed,diamater,color);
+            ballArray.push(player);
         }
+        return ballArray;
     }
-
-    // constructor function for balls
-    function Ball(x, y, angle, v, diameter) {
-        this.x = x;
-        this.y = y;
-        this.angle = angle;
-        this.v = v;
-        this.radius = diameter/2;
-        this.color = 'black';
-
-        this.draw = function() {
-            ctx.save();
-            ctx.beginPath();
-            ctx.fillStyle = this.color;
-            ctx.arc(this.x, this.y, this.radius, 0, 2*Math.PI);
-            ctx.fill();
-            ctx.restore();
-            this.color = 'black';
-        };
-
-        this.move = function() {
-            // add horizontal increment to the x pos
-            // add vertical increment to the y pos
-
-            var incX = this.v * Math.cos(this.angle);
-            var incY = this.v * Math.sin(this.angle);
-
-            this.x += calcDistanceToMove(delta, incX);
-            this.y += calcDistanceToMove(delta , incY);
-        };
-    }
-
 
     var start = function(){
         point1 = document.getElementById("point1");
@@ -361,6 +345,8 @@ var GF = function(){
         // default police for text
         ctx.font="20px Arial";
 
+        // TODO Remplacer monster par Balls - Joueur
+        ballArray = createPlayer(2, ballArray);
         monster.width = 50;
         monster.height = 50;
         monster.x = getRandomArbitrary(monster.width,w - monster.width);
@@ -452,7 +438,7 @@ var GF = function(){
         }, false);
 
         // We create tge balls: try to change the parameter
-        createBalls();
+        createBalls(ballArray);
 
         // start the animation
         requestAnimationFrame(mainLoop);
