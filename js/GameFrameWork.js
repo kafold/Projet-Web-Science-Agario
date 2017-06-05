@@ -19,7 +19,7 @@ var GF = function(){
     var delta, oldTime = 0;
 
     // I use this variable to know when a second has passed
-    var seconds;
+    var oldSeconds = 0;
 
     // vars for handling inputs
     var inputStates = {};
@@ -33,6 +33,9 @@ var GF = function(){
     var BALL_PLAYER_SPEED = 10; //pixels
     var BALL_MAX_NUMBER = 5;
     var BALL_RADIUS = 30;
+
+    // Time after which we add another ball to the canvas
+    var elapseTimeToAddBall = 2000; // in milliseconds
 
     //Players variable
     var PLAYER_SCORE_LIMIT = 100; // Le nombre max de points atteignable
@@ -116,10 +119,12 @@ var GF = function(){
         // update all the balls
         updateBalls(delta);
 
-        //Add new balls if there are less than 5
-        createBall(GLOBAL_OBJECT);
-
-        seconds = (seconds + 1) % 61;
+        if((time/elapseTimeToAddBall) - oldSeconds >= 1){
+            //Add new balls
+            //Only every second
+            createBall(GLOBAL_OBJECT);
+        }
+        oldSeconds = Math.floor(time/elapseTimeToAddBall);
 
         // call the animation loop every 1/60th of second
         requestAnimationFrame(mainLoop);

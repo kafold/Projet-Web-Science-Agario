@@ -46,13 +46,9 @@ function createPlayer(number, globalObject) {
 function findPlayerByName(name, globalObject) {
     for(var i = 0; i < globalObject.PLAYERS_ARRAY.length; i++){
         var player = globalObject.PLAYERS_ARRAY[i];
-        console.log("findPlayerByName: Player name = {" + player.name + "}");
         if(name === player.name){
-            console.log("findPlayerByName: True");
             return player;
         }
-        console.log("findPlayerByName: False");
     }
-    console.log("findPlayerByName: null");
     return null;
 }
