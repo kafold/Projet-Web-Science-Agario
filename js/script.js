@@ -301,6 +301,11 @@ var GF = function(){
     }
 
 
+    /** Créer un nombre de joueur(number) et les places dans la liste (ballArray)
+     *
+     * @param number
+     * @param ballArray
+     */
     function createPlayer(number, ballArray) {
         var player;
         var width;
@@ -308,7 +313,7 @@ var GF = function(){
         var x;
         var y;
         var angle;
-        var diamater;
+        var diameter;
         var speed;
         var color;
         for(var i = 1; i <= number; i++){
@@ -317,13 +322,12 @@ var GF = function(){
             x = getRandomArbitrary(width,w - width);
             y = getRandomArbitrary(height,h - height);
             angle = (2 * Math.PI) * Math.random();
-            diamater = BALL_PLAYER_RADIUS;
+            diameter = BALL_PLAYER_RADIUS;
             speed = BALL_PLAYER_SPEED;
             color = BALL_PLAYER_SPEED;
-            player = new Ball("player" + i,x,y,angle,speed,diamater,color);
+            player = new Ball("player" + i,x,y,angle,speed,diameter,color);
             ballArray.push(player);
         }
-        return ballArray;
     }
 
     var start = function(){
@@ -347,22 +351,6 @@ var GF = function(){
 
         // TODO Remplacer monster par Balls - Joueur
         ballArray = createPlayer(2, ballArray);
-        monster.width = 50;
-        monster.height = 50;
-        monster.x = getRandomArbitrary(monster.width,w - monster.width);
-        monster.y = getRandomArbitrary(monster.height,h - monster.height);
-        monster.angle = (2 * Math.PI) * Math.random();
-        monster.r = 3;
-        monster.speed = 10; // pixels/
-        monster.color = 'blue';
-        monster2.width = 50;
-        monster2.height = 50;
-        monster2.angle = (2 * Math.PI) * Math.random();
-        monster2.x = getRandomArbitrary(monster.width,w - monster.width);
-        monster2.y = getRandomArbitrary(monster.height,h - monster.height);
-        monster2.speed = 10; // pixels/
-        monster2.color = 'red';
-        monster2.r = 3;
 
         //add the listener to the main, window object, and update the states
         window.addEventListener('keydown', function(event){
