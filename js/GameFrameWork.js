@@ -81,7 +81,8 @@ var GF = function(){
     /** Déssine les balles de tout les joueurs
      */
     function drawPlayersBall() {
-        for(var player in playersArray){
+        for(var i = 0; i < playersArray.length; i++){
+            var player = playersArray[i];
             player.ball.draw(ctx);
         }
     }
@@ -89,7 +90,8 @@ var GF = function(){
     /** Déssine les balles des non-joueurs
      */
     function drawBalls() {
-        for(var ball in ballsArray){
+        for(var i = 0; i < ballsArray.length; i++){
+            var ball = ballsArray[i];
             ball.draw(ctx);
         }
     }
@@ -115,7 +117,7 @@ var GF = function(){
         updateBalls(delta);
 
         //Add new balls if there are less than 5
-        createBall(ballsArray);
+        createBall(GLOBAL_OBJECT);
 
         seconds = (seconds + 1) % 61;
 
@@ -123,8 +125,8 @@ var GF = function(){
         requestAnimationFrame(mainLoop);
 
         // TODO modify this when we have network game
-        point1.innerHTML = findPlayerByName("player1", GLOBAL_OBJECT).ball.score;
-        point2.innerHTML = findPlayerByName("player2", GLOBAL_OBJECT).ball.score;
+        point1.innerHTML = findPlayerByName("player1", GLOBAL_OBJECT).score;
+        point2.innerHTML = findPlayerByName("player2", GLOBAL_OBJECT).score;
     };
 
     /** Mise à jour de la position des joueurs
@@ -206,7 +208,7 @@ var GF = function(){
     function updateBalls(delta) {
         var ball;
         // for each ball in the array
-        for(var i=ballsArray.length - 1; i >= 0; --i) {
+        for(var i = ballsArray.length - 1; i >= 0; --i) {
             ball = ballsArray[i];
 
             // 1) move the ball
@@ -216,9 +218,10 @@ var GF = function(){
             testCollisionWithWalls(ball, GLOBAL_OBJECT);
 
             // Mise à jour du score des joueurs en cas de collisions
-            for(var player in playersArray){
+            for(var j = 0; j < playersArray.length; j++){
+                var player = playersArray[j];
                 if(hasBallCollided(player.ball, ball)){
-                    ballsArray.splice(i, 1);
+                    ballsArray.splice(j, 1);
                     player.score++;
                     player.ball.radius += 0.5;
                 }
@@ -370,7 +373,7 @@ var GF = function(){
         initialiseListeners();
 
         // Créer une balle
-        createBall(ballsArray);
+        createBall(GLOBAL_OBJECT);
 
         // start the animation
         requestAnimationFrame(mainLoop);

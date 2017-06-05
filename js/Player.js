@@ -20,6 +20,8 @@ function createPlayer(number, globalObject) {
     var speed;
     var color;
     var ball;
+    var w = globalObject.canvasWidth;
+    var h = globalObject.canvasHeight;
     for(var i = 1; i <= number; i++){
         width = globalObject.BALL_PLAYER_WIDTH;
         height = globalObject.BALL_PLAYER_HEIGHT;
@@ -42,10 +44,15 @@ function createPlayer(number, globalObject) {
  * @returns {*}
  */
 function findPlayerByName(name, globalObject) {
-    for(var player in globalObject.PLAYERS_ARRAY){
+    for(var i = 0; i < globalObject.PLAYERS_ARRAY.length; i++){
+        var player = globalObject.PLAYERS_ARRAY[i];
+        console.log("findPlayerByName: Player name = {" + player.name + "}");
         if(name === player.name){
+            console.log("findPlayerByName: True");
             return player;
         }
+        console.log("findPlayerByName: False");
     }
+    console.log("findPlayerByName: null");
     return null;
 }

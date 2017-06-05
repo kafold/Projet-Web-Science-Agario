@@ -52,9 +52,9 @@ function Ball(x, y, angle, speed, diameter, color) {
  * @param limit
  */
 function createBall(globalObject) {
-    var maxScore = maxScore(globalObject.PLAYERS_ARRAY);
+    var max = maxScore(globalObject.PLAYERS_ARRAY);
     var ballsArray = globalObject.BALLS_ARRAY;
-    if(ballsArray.length < globalObject.BALL_MAX_NUMBER && maxScore < globalObject.PLAYERS_SCORE_LIMIT){
+    if(ballsArray.length < globalObject.BALL_MAX_NUMBER && max < globalObject.PLAYERS_SCORE_LIMIT){
         var radius = globalObject.BALL_RADIUS;
         var ball =  new Ball(radius + Math.random() * (globalObject.canvasWidth - radius * 2),
             radius + Math.random() * (globalObject.canvasHeight - radius * 2),
