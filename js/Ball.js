@@ -72,3 +72,35 @@ function maxScore(playersArray){
     }
     return max;
 }
+
+
+/** Test si la balle(ball) a touché un coté du canvas
+ * Change l'angle de la balle si c'est le cas
+ *
+ * @param ball
+ * @param globalObject
+ */
+function testCollisionWithWalls(ball, globalObject) {
+    w = globalObject.canvasWidth;
+    h = globalObject.canvasHeight;
+    // left
+    if (ball.x < ball.radius) {
+        ball.x = ball.radius;
+        ball.angle = -ball.angle + Math.PI;
+    }
+    // right
+    if (ball.x > w - (ball.radius)) {
+        ball.x = w - (ball.radius);
+        ball.angle = -ball.angle + Math.PI;
+    }
+    // up
+    if (ball.y < ball.radius) {
+        ball.y = ball.radius;
+        ball.angle = -ball.angle;
+    }
+    // down
+    if (ball.y > h - (ball.radius)) {
+        ball.y = h - (ball.radius);
+        ball.angle =-ball.angle;
+    }
+}

@@ -247,15 +247,16 @@ var GF = function(){
     }
 
     function updateBalls(delta) {
+        var ball;
         // for each ball in the array
         for(var i=ballsArray.length - 1; i >= 0; --i) {
-            var ball = ballsArray[i];
+             ball = ballsArray[i];
 
             // 1) move the ball
             ball.move(delta);
 
             // 2) test if the ball collides with a wall
-            testCollisionWithWalls(ball);
+            testCollisionWithWalls(ball, GLOBAL_OBJECT);
 
             //TODO remove draw here as it is drawn in main loop with all other balls
             // 3) draw the ball
@@ -277,29 +278,11 @@ var GF = function(){
         }
     }
 
-    function testCollisionWithWalls(ball) {
-        // left
-        if (ball.x < ball.radius) {
-            ball.x = ball.radius;
-            ball.angle = -ball.angle + Math.PI;
-        }
-        // right
-        if (ball.x > w - (ball.radius)) {
-            ball.x = w - (ball.radius);
-            ball.angle = -ball.angle + Math.PI;
-        }
-        // up
-        if (ball.y < ball.radius) {
-            ball.y = ball.radius;
-            ball.angle = -ball.angle;
-        }
-        // down
-        if (ball.y > h - (ball.radius)) {
-            ball.y = h - (ball.radius);
-            ball.angle =-ball.angle;
-        }
-    }
-
+    /** Retourne la position de la souris en x,y
+     *
+     * @param evt
+     * @returns {{x: number, y: number}}
+     */
     function getMousePos(evt) {
         // necessary to take into account CSS boudaries
         var rect = canvas.getBoundingClientRect();
@@ -308,8 +291,6 @@ var GF = function(){
             y: evt.clientY - rect.top
         };
     }
-
-
 
     /** Initialise les écouteurs de l'application
      */
