@@ -109,6 +109,10 @@ var GF = function(){
         }
     }
 
+    function updateScore() {
+
+    }
+
     var mainLoop = function(time){
         //main function, called each frame 
         measureFPS(time);
@@ -213,6 +217,10 @@ var GF = function(){
         testCollisionWithWalls(player2, GLOBAL_OBJECT);
     }
 
+    /** Mise à jour des balles
+     *
+     * @param delta
+     */
     function updateBalls(delta) {
         var ball;
         // for each ball in the array
@@ -225,6 +233,7 @@ var GF = function(){
             // 2) test if the ball collides with a wall
             testCollisionWithWalls(ball, GLOBAL_OBJECT);
 
+            // Mise à jour du score des joueurs en cas de collisions
             for(var player in playersArray){
                 if(hasBallCollided(player.ball, ball)){
                     ballsArray.splice(i, 1);
