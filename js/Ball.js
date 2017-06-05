@@ -7,8 +7,7 @@
  * @param diameter
  * @constructor
  */
-function Ball(name, x, y, angle, speed, diameter, color) {
-    this.name = name;
+function Ball(x, y, angle, speed, diameter, color) {
     this.x = x;
     this.y = y;
     this.angle = angle;
@@ -37,7 +36,7 @@ function Ball(name, x, y, angle, speed, diameter, color) {
     };
 }
 
-/**
+/** Créer une balle
  *
  * @param ballArray
  * @param canvasWidth
@@ -45,16 +44,31 @@ function Ball(name, x, y, angle, speed, diameter, color) {
  * @param maxScore
  * @param limit
  */
-function createBalls(ballArray, canvasWidth, canvasHeight, maxScore, limit) {
-    if(ballArray.length < 5 && maxScore < limit){
-        var radius = 30;
-        var ball =  new Ball(radius + Math.random() * (canvasWidth - radius * 2),
-            radius + Math.random() * (canvasHeight - radius * 2),
+function createBall(globalObject) {
+    var maxScore = maxScore(globalObject.PLAYERS_ARRAY);
+    var ballsArray = globalObject.BALLS_ARRAY;
+    if(ballsArray.length < globalObject.BALL_MAX_NUMBER && maxScore < globalObject.PLAYERS_SCORE_LIMIT){
+        var radius = globalObject.BALL_RADIUS;
+        var ball =  new Ball(radius + Math.random() * (globalObject.canvasWidth - radius * 2),
+            radius + Math.random() * (globalObject.canvasHeight - radius * 2),
             (2 * Math.PI) * Math.random(),
             (80*Math.random()),
             radius);
         // On la rajoute au tableau
-        ballArray.push(ball);
+        ballsArray.push(ball);
     }
 }
 
+/** Calcule le score maximum entre les joueurs
+ *
+ * @param playersArray
+ * @returns {number} le score max
+ */
+function maxScore(playersArray){
+    if(!playersArray) return 0;
+    var max = 0;
+    for (var player in playersArray){
+        max = player.score > max? player.score: max;
+    }
+    return max;
+}

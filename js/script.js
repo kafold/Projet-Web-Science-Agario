@@ -39,15 +39,24 @@ var GF = function(){
     //var monster = {};
     //var monster2 = {};
 
+    var GLOBAL_OBJECT = {};
     //Balls global variable
     var BALL_PLAYER_COLOR = 'blue';
     var BALL_PLAYER_WIDTH = 50;
     var BALL_PLAYER_HEIGHT = 50;
     var BALL_PLAYER_RADIUS = 3;
     var BALL_PLAYER_SPEED = 10; //pixels
+    var BALL_MAX_NUMBER = 5;
+    var BALL_RADIUS = 30;
+
+    //Players variable
+    var PLAYER_SCORE_LIMIT = 100; // Le nombre max de points atteignable
 
     // array of balls to animate
-    var ballArray = [];
+    var ballsArray = [];
+
+    //array of players
+    var playersArray = [];
 
 
 
@@ -127,7 +136,7 @@ var GF = function(){
         updateBalls(delta);
 
         //Add new balls if there are less than 5
-        createBalls(ballArray);
+        createBall(ballsArray);
 
         seconds = (seconds + 1) % 61;
 
@@ -239,8 +248,8 @@ var GF = function(){
 
     function updateBalls(delta) {
         // for each ball in the array
-        for(var i=ballArray.length - 1; i >= 0; --i) {
-            var ball = ballArray[i];
+        for(var i=ballsArray.length - 1; i >= 0; --i) {
+            var ball = ballsArray[i];
 
             // 1) move the ball
             ball.move(delta);
@@ -255,13 +264,13 @@ var GF = function(){
             // Test if the monster collides
             if(circleCollide(monster.x + monster.r, monster.y + monster.r, monster.r,
                     ball.x, ball.y, ball.radius)) {
-                ballArray.splice(i, 1);
+                ballsArray.splice(i, 1);
                 numberOfBalls1++;
                 monster.r += 0.5;
             }
             else if(circleCollide(monster2.x + monster2.r, monster2.y + monster2.r, monster2.r,
                     ball.x, ball.y, ball.radius)) {
-                ballArray.splice(i, 1);
+                ballsArray.splice(i, 1);
                 numberOfBalls2++;
                 monster2.r += 0.5;
             }
@@ -301,57 +310,10 @@ var GF = function(){
     }
 
 
-    /** Créer un nombre de joueur(number) et les places dans la liste (ballArray)
-     *
-     * @param number
-     * @param ballArray
+
+    /** Initialise les écouteurs de l'application
      */
-    function createPlayer(number, ballArray) {
-        var player;
-        var width;
-        var height;
-        var x;
-        var y;
-        var angle;
-        var diameter;
-        var speed;
-        var color;
-        for(var i = 1; i <= number; i++){
-            width = BALL_PLAYER_WIDTH;
-            height = BALL_PLAYER_HEIGHT;
-            x = getRandomArbitrary(width,w - width);
-            y = getRandomArbitrary(height,h - height);
-            angle = (2 * Math.PI) * Math.random();
-            diameter = BALL_PLAYER_RADIUS;
-            speed = BALL_PLAYER_SPEED;
-            color = BALL_PLAYER_SPEED;
-            player = new Ball("player" + i,x,y,angle,speed,diameter,color);
-            ballArray.push(player);
-        }
-    }
-
-    var start = function(){
-        point1 = document.getElementById("point1");
-        point2 = document.getElementById("point2");
-        // adds a div for displaying the fps value
-        fpsContainer = document.createElement('div');
-        document.body.appendChild(fpsContainer);
-
-        // Canvas, context etc.
-        canvas = document.querySelector("#myCanvas");
-
-        // often useful
-        w = canvas.width;
-        h = canvas.height;
-
-        // important, we will draw with this object
-        ctx = canvas.getContext('2d');
-        // default police for text
-        ctx.font="20px Arial";
-
-        // TODO Remplacer monster par Balls - Joueur
-        ballArray = createPlayer(2, ballArray);
-
+    function initialiseListeners() {
         //add the listener to the main, window object, and update the states
         window.addEventListener('keydown', function(event){
             if (event.keyCode === 37) {
@@ -425,8 +387,61 @@ var GF = function(){
             inputStates.mousedown = false;
         }, false);
 
-        // We create tge balls: try to change the parameter
-        createBalls(ballArray);
+    }
+
+    /** Initialise une variable global qu'on passeras aux classes externe
+     * afin de partager les informations nécessaire.
+     *
+     * Singleton
+     *
+     * @returns {{BALL_PLAYER_COLOR: string, BALL_PLAYER_WIDTH: number, BALL_PLAYER_HEIGHT: number, BALL_PLAYER_RADIUS: number, BALL_PLAYER_SPEED: number}}
+     */
+    function initialiseGlobalObject() {
+        // Canvas, context etc.
+        canvas = document.querySelector("#myCanvas");
+
+        // often useful
+        w = canvas.width;
+        h = canvas.height;
+
+        // important, we will draw with this object
+        ctx = canvas.getContext('2d');
+        // default police for text
+        ctx.font="20px Arial";
+        return {
+            ctx: ctx,
+            canvasWidth: w,
+            canvasHeight: h,
+            BALL_PLAYER_COLOR: BALL_PLAYER_COLOR,
+            BALL_PLAYER_WIDTH: BALL_PLAYER_WIDTH,
+            BALL_PLAYER_HEIGHT: BALL_PLAYER_HEIGHT,
+            BALL_PLAYER_RADIUS: BALL_PLAYER_RADIUS,
+            BALL_PLAYER_SPEED: BALL_PLAYER_SPEED,
+            BALL_MAX_NUMBER:BALL_MAX_NUMBER,
+            BALLS_ARRAY: ballsArray,
+            PLAYERS_ARRAY:playersArray,
+            PLAYERS_SCORE_LIMIT: PLAYER_SCORE_LIMIT,
+            BALL_RADIUS:BALL_RADIUS
+        }
+    }
+
+    var start = function(){
+        point1 = document.getElementById("point1");
+        point2 = document.getElementById("point2");
+        // adds a div for displaying the fps value
+        fpsContainer = document.createElement('div');
+        document.body.appendChild(fpsContainer);
+
+        GLOBAL_OBJECT = initialiseGlobalObject();
+
+        // Créer deux joueurs pour le moment
+        // Créer les balles pour les joueurs
+        createPlayer(2, GLOBAL_OBJECT);
+
+        initialiseListeners();
+
+        // Créer une balle
+        createBall(ballsArray);
 
         // start the animation
         requestAnimationFrame(mainLoop);
