@@ -15,12 +15,19 @@ function Ball(x, y, angle, speed, diameter, color) {
     this.radius = diameter/2;
     this.color = color;
 
+    /**
+     *
+     * @param ctx
+     * @param x for translation
+     * @param y for translation
+     */
     this.draw = function(ctx) {
         ctx.save();
-        ctx.beginPath();
         ctx.fillStyle = this.color;
+        ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, 2*Math.PI);
         ctx.fill();
+        ctx.stroke();
         ctx.restore();
     };
 
@@ -103,4 +110,23 @@ function testCollisionWithWalls(ball, globalObject) {
         ball.y = h - (ball.radius);
         ball.angle =-ball.angle;
     }
+}
+
+/** Calcul s'il y a eu collision entre deux balles.
+ *
+ * @returns {boolean}
+ * @param ball1
+ * @param ball2
+ */
+function hasBallCollided(ball1, ball2) {
+    var x1,y1,r1,x2,y2,r2;
+    x1 = ball1.x;
+    y1 = ball1.y;
+    r1 = ball1.radius;
+    x2 = ball2.x;
+    y2 = ball2.y;
+    r2 = ball2.radius;
+    var dx = x1 - x2;
+    var dy = y1 - y2;
+    return ((dx * dx + dy * dy) < (r1 + r2)*(r1+r2));
 }

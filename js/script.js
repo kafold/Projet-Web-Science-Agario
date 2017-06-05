@@ -58,8 +58,6 @@ var GF = function(){
     //array of players
     var playersArray = [];
 
-
-
     var measureFPS = function(newTime){
 
         // test for the very first invocation
@@ -88,30 +86,27 @@ var GF = function(){
         ctx.clearRect(0, 0, w, h);
     }
 
-    // Functions for drawing the monster and maybe other objects
-    function drawMyMonster(x, y, color, rayon) {
-        // save the context
-        ctx.save();
-
-        // translate the coordinate system, draw relative to it
-        ctx.translate(x, y);
-
-        ctx.fillStyle = color;
-        // (0, 0) is the top left corner of the monster.
-        ctx.beginPath();
-        ctx.arc(rayon,rayon , rayon, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.stroke();
-
-        // restore the context
-        ctx.restore();
-    }
-
     function timer(currentTime) {
         var delta = currentTime - oldTime;
         oldTime = currentTime;
         return delta;
 
+    }
+
+    /** Déssine les balles de tout les joueurs
+     */
+    function drawPlayersBall() {
+        for(var player in playersArray){
+            player.ball.draw(ctx);
+        }
+    }
+
+    /** Déssine les balles des non-joueurs
+     */
+    function drawBalls() {
+        for(var ball in ballsArray){
+            ball.draw(ctx);
+        }
     }
 
     var mainLoop = function(time){
@@ -124,15 +119,14 @@ var GF = function(){
         // Clear the canvas
         clearCanvas();
 
-        // TODO Remplacer par drawAllBalls
-        // draw the monster
-        drawMyMonster(monster.x, monster.y, monster.color, monster.r);
-        drawMyMonster(monster2.x, monster2.y, monster.color, monster2.r);
+        // DRAWING
+        drawPlayersBall();
+        drawBalls();
 
-        // Check inputs and move the monster
-        updateMonsterPosition(delta);
-
-        // update and draw balls
+        // UPDATING
+        // Mise à jour des positions des joueurs
+        updatePlayerPosition(delta);
+        // update all the balls
         updateBalls(delta);
 
         //Add new balls if there are less than 5
@@ -147,103 +141,76 @@ var GF = function(){
         point2.innerHTML = numberOfBalls2;
     };
 
-    function circleCollide(x1, y1, r1, x2, y2, r2) {
-        var dx = x1 - x2;
-        var dy = y1 - y2;
-        return ((dx * dx + dy * dy) < (r1 + r2)*(r1+r2));
-    }
+    /** Mise à jour de la position des joueurs
+     *
+     * @param delta le temps écoulé depuis la derniére frame
+     */
+    function updatePlayerPosition(delta) {
+        var player1 = findPlayerByName("player1", GLOBAL_OBJECT).ball;
+        var player2 = findPlayerByName("player2", GLOBAL_OBJECT).ball;
 
-    // Collisions between rectangle and circle
-    function circRectsOverlap(x0, y0, w0, h0, cx, cy, r) {
-        var testX=cx;
-        var testY=cy;
-        if (testX < x0) testX=x0;
-        if (testX > (x0+w0)) testX=(x0+w0);
-        if (testY < y0) testY=y0;
-        if (testY > (y0+h0)) testY=(y0+h0);
-        return (((cx-testX)*(cx-testX)+(cy-testY)*(cy-testY))< r*r);
-    }
+        var player1speedX = 0;
+        var player1speedY = 0;
+        var player1speed = player1.speed;
 
-    function updateMonsterPosition(delta) {
-        monster.speedX = monster.speedY = 0;
+        var player2speedX = 0;
+        var player2speedY = 0;
+        var player2speed = player2.speed;
+
         // check inputStates
         if (inputStates.left) {
-            monster.speedX = -monster.speed;
+            player1speedX = -player1speed;
         }
         if (inputStates.up) {
-            monster.speedY = -monster.speed;
+            player1speedY = -player1speed;
         }
         if (inputStates.right) {
-            monster.speedX = monster.speed;
+            player1speedX = player1speed;
         }
         if (inputStates.down) {
-            monster.speedY = monster.speed;
+            player1speedY = player1speed;
         }
         if (inputStates.space) {
         }
         if (inputStates.mousePos) {
         }
         if (inputStates.mousedown) {
-            monster.speed = 500;
+            player1.speed = 500;
         } else {
             // mouse up
-            monster.speed = 100;
+            player1.speed = 100;
         }
-        monster2.speedX = monster2.speedY = 0;
+
         // check inputStates
         if (inputStates.keyDownA) {
-            monster2.speedX = -monster2.speed;
+            player2speedX = -player2speed;
         }
         if (inputStates.keyDownZ) {
-            monster2.speedY = -monster2.speed;
+            player2speedY = -player2speed;
         }
         if (inputStates.keyDownE) {
-            monster2.speedX = monster2.speed;
+            player2speedX = player2speed;
         }
         if (inputStates.keyDownS) {
-            monster2.speedY = monster2.speed;
+            player2speedY = player2speed;
         }
         if (inputStates.mousedown) {
-            monster2.speed = 500;
+            player2.speed = 500;
         } else {
             // mouse up
-            monster2.speed = 100;
+            player2.speed = 100;
         }
 
-        // COmpute the incX and inY in pixels depending
+        // Compute the incX and inY in pixels depending
         // on the time elasped since last redraw
-        monster.x += calcDistanceToMove(delta, monster.speedX);
-        monster.y += calcDistanceToMove(delta, monster.speedY);
+        player1.x += calcDistanceToMove(delta, player1speedX);
+        player1.y += calcDistanceToMove(delta, player1speedY);
 
-        monster2.x += calcDistanceToMove(delta, monster2.speedX);
-        monster2.y += calcDistanceToMove(delta, monster2.speedY);
+        player2.x += calcDistanceToMove(delta, player2speedX);
+        player2.y += calcDistanceToMove(delta, player2speedY);
 
-        calcOutOfBoundCircle(monster);
-        calcOutOfBoundCircle(monster2);
-
-    }
-
-    function calcOutOfBoundCircle(monster) {
-        // left
-        if (monster.x < monster.r) {
-            monster.x = monster.r;
-            monster.angle = -monster.angle + Math.PI;
-        }
-        // right
-        if (monster.x > w - (monster.r)) {
-            monster.x = w - (monster.r);
-            monster.angle = -monster.angle + Math.PI;
-        }
-        // up
-        if (monster.y < monster.r) {
-            monster.y = monster.r;
-            monster.angle = -monster.angle;
-        }
-        // down
-        if (monster.y > h - (monster.r)) {
-            monster.y = h - (monster.r);
-            monster.angle =-monster.angle;
-        }
+        testCollisionWithWalls(player1, GLOBAL_OBJECT);
+        testCollisionWithWalls(player2, GLOBAL_OBJECT);
     }
 
     function updateBalls(delta) {
@@ -258,22 +225,12 @@ var GF = function(){
             // 2) test if the ball collides with a wall
             testCollisionWithWalls(ball, GLOBAL_OBJECT);
 
-            //TODO remove draw here as it is drawn in main loop with all other balls
-            // 3) draw the ball
-            ball.draw(ctx);
-
-            // Test if the monster collides
-            if(circleCollide(monster.x + monster.r, monster.y + monster.r, monster.r,
-                    ball.x, ball.y, ball.radius)) {
-                ballsArray.splice(i, 1);
-                numberOfBalls1++;
-                monster.r += 0.5;
-            }
-            else if(circleCollide(monster2.x + monster2.r, monster2.y + monster2.r, monster2.r,
-                    ball.x, ball.y, ball.radius)) {
-                ballsArray.splice(i, 1);
-                numberOfBalls2++;
-                monster2.r += 0.5;
+            for(var player in playersArray){
+                if(hasBallCollided(player.ball, ball)){
+                    ballsArray.splice(i, 1);
+                    player.score++;
+                    player.ball.radius += 0.5;
+                }
             }
         }
     }

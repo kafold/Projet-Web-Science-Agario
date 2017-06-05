@@ -34,3 +34,18 @@ function createPlayer(number, globalObject) {
         globalObject.PLAYERS_ARRAY.push(player);
     }
 }
+
+/** Recherche le joueur ayant comme nom(name)
+ *
+ * @param name
+ * @param globalObject
+ * @returns {*}
+ */
+function findPlayerByName(name, globalObject) {
+    for(var player in globalObject.PLAYERS_ARRAY){
+        if(name === player.name){
+            return player;
+        }
+    }
+    return null;
+}
