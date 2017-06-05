@@ -30,7 +30,7 @@ function createPlayer(number, globalObject) {
         angle = (2 * Math.PI) * Math.random();
         diameter = globalObject.BALL_PLAYER_RADIUS;
         speed = globalObject.BALL_PLAYER_SPEED;
-        color = globalObject.BALL_PLAYER_SPEED;
+        color = globalObject.BALL_PLAYER_COLOR;
         ball = new Ball(x,y,angle,speed,diameter,color);
         player = new Player("player" + i, ball);
         globalObject.PLAYERS_ARRAY.push(player);
