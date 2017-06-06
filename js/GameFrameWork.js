@@ -1,12 +1,13 @@
-/**
- * Le FRAMEWORK de notre jeu. Il suffit d'appeler la méthode start pour lancer le jeu.
+/** Le FRAMEWORK de notre jeu.
+ * Il suffit d'appeler la méthode start pour lancer le jeu.
  *
  */
 var GF = function(){
     // Vars relative to the canvas
     var canvas, ctx, w, h;
 
-    //Un element dans laquelle on va afficher les points
+    // TODO modifier l'affichage - variable selon nombre de joueur
+    // Un element dans laquelle on va afficher les points
     var point1;
     var point2;
 
@@ -24,6 +25,7 @@ var GF = function(){
     // vars for handling inputs
     var inputStates = {};
 
+    // Singleton contenant les variables nécessaire aux classes externes.
     var GLOBAL_OBJECT = {};
     //Balls global variable
     var BALL_PLAYER_COLOR = 'blue';
@@ -46,8 +48,17 @@ var GF = function(){
     //array of players
     var playersArray = [];
 
-    var measureFPS = function(newTime){
+    var DOCUMENT_ID_CANVAS = "#myCanvas";
+    var DOCUMENT_ID_POINT_JOUEUR_1 = "point1";
+    var DOCUMENT_ID_POINT_JOUEUR_2 = "point2";
 
+    //------------------------------------------- FUNCTIONS ------------------------------------------------------------
+
+    /** Calcul le nombre de fps qu'on a pu faire dans la seconde jusqu'à maintenant.
+     *
+     * @param newTime noveau temps de mesure
+     */
+    var measureFPS = function(newTime){
         // test for the very first invocation
         if(lastTime === undefined) {
             lastTime = newTime;
@@ -57,28 +68,32 @@ var GF = function(){
         //calculate the difference between last & current frame
         var diffTime = newTime - lastTime;
 
+        // Si on a dépassé la seconde
         if (diffTime >= 1000) {
             fps = frameCount;
             frameCount = 0;
             lastTime = newTime;
         }
 
-        //and display it in an element we appended to the
-        // document in the start() function
-        fpsContainer.innerHTML = 'FPS: ' + fps;
         frameCount++;
+        return fps;
     };
 
-    // clears the canvas content
+    /** clears the canvas content
+     */
     function clearCanvas() {
         ctx.clearRect(0, 0, w, h);
     }
 
+    /** Calculate difference in time since last frame
+     *
+     * @param currentTime
+     * @returns {number}
+     */
     function timer(currentTime) {
         var delta = currentTime - oldTime;
         oldTime = currentTime;
         return delta;
-
     }
 
     /** Déssine les balles de tout les joueurs
@@ -99,9 +114,21 @@ var GF = function(){
         }
     }
 
+    /** Write the number of fps into the right element in the html
+     *
+     * @param fps
+     */
+    function DocumentWriteFPS(fps) {
+        fpsContainer.innerHTML = 'FPS: ' + fps;
+    }
+
+    /** The main function. This is at each frame.
+     *
+     * @param time time elapsed since start of the game
+     */
     var mainLoop = function(time){
-        //main function, called each frame
-        measureFPS(time);
+        // Calculate and write the number of fps the game is actually running at
+        DocumentWriteFPS(measureFPS(time));
 
         // number of ms since last frame draw
         delta = timer(time);
@@ -207,6 +234,8 @@ var GF = function(){
     }
 
     /** Mise à jour des balles
+     * - déplacement + changement de direction au cas où ils rebondissent contre le mur
+     * - suppresion si mangé + mise à jour du score des joueurs
      *
      * @param delta
      */
@@ -225,6 +254,7 @@ var GF = function(){
             // Mise à jour du score des joueurs en cas de collisions
             for(var j = 0; j < playersArray.length; j++){
                 var player = playersArray[j];
+                // TODO modifier car la suppression se fait mal
                 if(hasBallCollided(player.ball, ball)){
                     ballsArray.splice(j, 1);
                     player.score++;
@@ -234,7 +264,7 @@ var GF = function(){
         }
     }
 
-    /** Retourne la position de la souris en x,y
+    /** Retourne un objet représentant la position de la souris en (x,y)
      *
      * @param evt
      * @returns {{x: number, y: number}}
@@ -323,10 +353,9 @@ var GF = function(){
         canvas.addEventListener('mouseup', function (evt) {
             inputStates.mousedown = false;
         }, false);
-
     }
 
-    /** Initialise une variable global qu'on passeras aux classes externe
+    /** Initialise une variable globale qu'on passeras aux classes externe
      * afin de partager les informations nécessaire.
      *
      * Singleton
@@ -335,7 +364,7 @@ var GF = function(){
      */
     function initialiseGlobalObject() {
         // Canvas, context etc.
-        canvas = document.querySelector("#myCanvas");
+        canvas = document.querySelector(DOCUMENT_ID_CANVAS);
 
         // often useful
         w = canvas.width;
@@ -362,9 +391,11 @@ var GF = function(){
         }
     }
 
+    /** Launch the application
+     */
     var start = function(){
-        point1 = document.getElementById("point1");
-        point2 = document.getElementById("point2");
+        point1 = document.getElementById(DOCUMENT_ID_POINT_JOUEUR_1);
+        point2 = document.getElementById(DOCUMENT_ID_POINT_JOUEUR_2);
         // adds a div for displaying the fps value
         fpsContainer = document.createElement('div');
         document.body.appendChild(fpsContainer);
@@ -384,7 +415,8 @@ var GF = function(){
         requestAnimationFrame(mainLoop);
     };
 
-    //our GameFramework returns a public API visible from outside its scope
+    /** Our GameFramework returns a public API visible from outside its scope
+     */
     return {
         start: start
     };
