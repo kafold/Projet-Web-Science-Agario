@@ -5,6 +5,7 @@
  * @param angle
  * @param speed velocity
  * @param diameter
+ * @param color
  * @constructor
  */
 function Ball(x, y, angle, speed, diameter, color) {
@@ -59,7 +60,8 @@ function createBall() {
             radius + Math.random() * (CANVAS_HEIGHT - radius * 2),
             (2 * Math.PI) * Math.random(),
             (80*Math.random()),
-            radius);
+            radius,
+            BALL_COLOR);
         // On la rajoute au tableau
         BALLS_ARRAY.push(ball);
     }

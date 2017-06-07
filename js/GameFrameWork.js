@@ -1,6 +1,7 @@
 
 //Balls global variable
-var BALL_PLAYER_COLOR = 'blue';
+var BALL_PLAYER_COLOR = 'white';
+var BALL_COLOR = 'yellow';
 var BALL_PLAYER_WIDTH = 50;
 var BALL_PLAYER_HEIGHT = 50;
 var BALL_PLAYER_RADIUS = 3;
@@ -24,6 +25,20 @@ var PLAYER_SCORE_LIMIT = 100; // Le nombre max de points atteignable
 
 // Vars relative to the CANVAS
 var CANVAS, CTX, CANVAS_WIDTH, CANVAS_HEIGHT;
+
+var gamesStates = {
+    mainMenu: 0,
+    gameRunning: 1,
+    gameOver: 2
+};
+
+var background;
+var mainmenuImageBackground;
+
+var currentGameState = gamesStates.mainMenu;
+var currentLevel = 1;
+var TIME_BETWEEN_LEVELS = 10000; // 10 secondes
+
 
 /** Le FRAMEWORK de notre jeu.
  * Il suffit d'appeler la méthode start pour lancer le jeu.
@@ -142,31 +157,60 @@ var GF = function(){
         // Clear the CANVAS
         clearCanvas();
 
-        // DRAWING
-        drawPlayersBall();
-        drawBalls();
-
-        // UPDATING
-        // Mise à jour des positions des joueurs
-        updatePlayerPosition(delta);
-        // update all the balls
-        updateBalls(delta);
-
-        if((time/elapseTimeToAddBall) - oldSeconds >= 1){
-            //Add new balls
-            //Only every second
-            createBall();
-        }
-        oldSeconds = Math.floor(time/elapseTimeToAddBall);
-
         // call the animation loop every 1/60th of second
         if(maxScore() < PLAYER_SCORE_LIMIT) {
             requestAnimationFrame(mainLoop);
         }
+        else{
+            currentGameState = gamesStates.gameOver;
+        }
 
-        // TODO modify this when we have network game
-        point1.innerHTML = player1.score;
-        point2.innerHTML = player2.score;
+        switch (currentGameState){
+            case gamesStates.mainMenu:
+                CTX.drawImage(mainmenuImageBackground, 0, 0);
+                CTX.fillText("WELCOME TO AGARIO", 50, 100);
+                CTX.fillText("Press SPACE to start", 50, 150);
+                CTX.fillText("Move with arrow keys", 50, 200);
+                CTX.fillText("Eat more than your opponents", 50, 250);
+                if (inputStates.space) {
+                    startNewGame();
+                }
+
+                break;
+            case gamesStates.gameRunning:
+                CTX.drawImage(background, 0, 0);
+                // DRAWING
+                drawPlayersBall();
+                drawBalls();
+
+                // UPDATING
+                // Mise à jour des positions des joueurs
+                updatePlayerPosition(delta);
+                // update all the balls
+                updateBalls(delta);
+
+                if((time/elapseTimeToAddBall) - oldSeconds >= 1){
+                    //Add new balls
+                    //Only every second
+                    createBall();
+                }
+                oldSeconds = Math.floor(time/elapseTimeToAddBall);
+
+                // TODO modify this when we have network game
+                point1.innerHTML = player1.score;
+                point2.innerHTML = player2.score;
+                break;
+            case gamesStates.gameOver:
+                CTX.fillText("GAME OVER", 50, 100);
+                CTX.fillText("Press SPACE to start again", 50, 150);
+                CTX.fillText("Move with arrow keys", 50, 200);
+                CTX.fillText("Survive 5 seconds for next level", 50, 250);
+
+                if (inputStates.space) {
+                    startNewGame();
+                }
+        }
+
     };
 
     /** Mise à jour de la position des joueurs
@@ -387,9 +431,17 @@ var GF = function(){
         // default police for text
         CTX.font="20px Arial";
 
+        background = new Image();
+        background.src = "ressource/background.jpg";
+        mainmenuImageBackground = new Image();
+        mainmenuImageBackground.src = "ressource/serveimage.png";
+
         // adds a div for displaying the fps value
         fpsContainer = document.createElement('div');
         document.body.appendChild(fpsContainer);
+
+        initialiseListeners();
+
 
         // Créer deux joueurs pour le moment
         // Créer les balles pour les joueurs
@@ -397,9 +449,10 @@ var GF = function(){
         player1 = findPlayerByName("player1");
         console.log(player1);
         player2 = findPlayerByName("player2");
+
         console.log(player2);
 
-        initialiseListeners();
+        currentGameState = gamesStates.mainMenu;
 
         // Créer une balle
         createBall();
@@ -407,6 +460,17 @@ var GF = function(){
         // start the animation
         requestAnimationFrame(mainLoop);
     };
+
+    function startNewGame() {
+        currentLevel = 1;
+        BALL_MAX_NUMBER = 5;
+        currentGameState = gamesStates.gameRunning;
+    }
+
+    function goToNextLevel() {
+        currentLevel++;
+        BALL_MAX_NUMBER = BALL_MAX_NUMBER + 2;
+    }
 
     /** Our GameFramework returns a public API visible from outside its scope
      */
