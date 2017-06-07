@@ -6,7 +6,8 @@ var establishConnectionToServer = function () {
     // on connection to server, ask for user's name with an anonymous callback
     socket.on('connect', function(){
         // call the server-side function 'adduser' and send one parameter (value of prompt)
-        socket.emit('adduser', USERNAME, findPlayerByName(USERNAME));
+        var player = makeObjectForPlayer(findPlayerByName(USERNAME))
+        socket.emit('adduser', USERNAME, player);
     });
 
     // listener, whenever the server emits 'updatechat', this updates the chat body

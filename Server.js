@@ -63,9 +63,7 @@ io.sockets.on('connection', function (socket) {
         // tell all clients to update the list of users on the GUI
         io.sockets.emit('updateusers', usernames);
 
-        io.sockets.emit('updatePlayers',{
-            playersArray:playersArray
-        });
+        io.sockets.emit('updatePlayers', playersArray);
     });
 
     // when the user disconnects.. perform this
