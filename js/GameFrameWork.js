@@ -58,6 +58,8 @@ var GF = function(){
     // Time after which we add another ball to the canvas
     var elapseTimeToAddBall = 2000; // in milliseconds
 
+    var array_temp = [];
+
     //------------------------------------------- FUNCTIONS ------------------------------------------------------------
 
     /** Calcul le nombre de fps qu'on a pu faire dans la seconde jusqu'à maintenant.
@@ -105,18 +107,21 @@ var GF = function(){
     /** Déssine les balles de tout les joueurs
      */
     function drawPlayersBall() {
+        console.log("#################### drawPlayersBall ##################");
         for(var i = 0; i < PLAYERS_ARRAY.length; i++){
             var player = PLAYERS_ARRAY[i];
+            console.log(player);
+            console.log(player.ball);
             player.ball.draw(CTX);
         }
+        console.log("###############################################");
     }
 
     /** Déssine les balles des non-joueurs
      */
     function drawBalls() {
-        var log = false;
+        var log = true;
         if(log)console.log("################### drawBalls() ################### ");
-        if(log)console.log("drawBalls(): BALLS_ARRAY:");
         if(log)console.log(BALLS_ARRAY);
         for(var i = 0; i < BALLS_ARRAY.length; i++){
             var ball = BALLS_ARRAY[i];
@@ -232,39 +237,34 @@ var GF = function(){
         if(log)console.log("################### updateBalls() ################### ");
         var ball;
         // for each ball in the array
-        for(var i = BALLS_ARRAY.length - 1; i >= 0; --i) {
-            if(log)console.log("updateBalls(): i = " + i);
+        array_temp = [];
+        for(var i = 0; i < BALLS_ARRAY.length; i++) {
             ball = BALLS_ARRAY[i];
-            if(log)console.log("updateBalls(): ball:");
-            if(log)console.log(ball);
             // 1) move the ball
             ball.move(delta);
-            if(log)console.log("updateBalls(): moved");
-            if(log)console.log("updateBalls(): ball:");
-            if(log)console.log(ball);
 
             // 2) test if the ball collides with a wall
             testCollisionWithWalls(ball);
-            if(log)console.log("updateBalls(): collision with wall");
-            if(log)console.log("updateBalls(): ball:");
-            if(log)console.log(ball);
 
             // Mise à jour du score des joueurs en cas de collisions
             for(var j = 0; j < PLAYERS_ARRAY.length; j++){
                 var player = PLAYERS_ARRAY[j];
-                if(log)console.log("updateBalls(): player i = " + i);
-                if(log)console.log("updateBalls(): player:");
-                if(log)console.log(player);
 
                 // TODO modifier car la suppression se fait mal
                 if(hasBallCollided(player.ball, ball)){
                     if(log)console.log("updateBalls(): collided with player, splicing...");
-                    BALLS_ARRAY.splice(i, 1);
                     player.score++;
                     player.ball.radius += 0.5;
                 }
+                else{
+                    if(log)console.log("updateBalls(): NOT collided with player, splicing...");
+                    array_temp.push(ball);
+                }
             }
         }
+        BALLS_ARRAY = array_temp;
+        if(log)console.log(array_temp);
+        if(log)console.log(BALLS_ARRAY);
         if(log)console.log("###################################### ");
     }
 

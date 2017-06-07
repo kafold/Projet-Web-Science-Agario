@@ -47,7 +47,6 @@ function Ball(x, y, angle, speed, diameter, color) {
  */
 function createBall() {
     console.log("################### createBall() ################### ");
-    console.log("createBall: BALLS_ARRAY before addition ");
     console.log(BALLS_ARRAY);
     var max = maxScore();
     if(BALLS_ARRAY.length < BALL_MAX_NUMBER && max < PLAYER_SCORE_LIMIT){
@@ -59,12 +58,7 @@ function createBall() {
             radius);
         // On la rajoute au tableau
         BALLS_ARRAY.push(ball);
-        console.log("createBall: just add a ball");
-        console.log("createBall: ball is ");
-        console.log(ball);
-        console.log("createBall: BALLS_ARRAY is ");
         console.log(BALLS_ARRAY);
-
     }
     console.log("################################################## ");
 }

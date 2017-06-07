@@ -45,13 +45,14 @@ io.sockets.on('connection', function (socket) {
     });
 
     // when the client emits 'adduser', this listens and executes
-    socket.on('adduser', function(username, arrays){
+    socket.on('adduser', function(username, player){
         // we store the username in the socket session for this client
         // the 'socket' variable is unique for each client connected,
         // so we can use it as a sort of HTTP session
         socket.username = username;
-        ballsArray = arrays.ballsArray;
-        playersArray = arrays.playersArray;
+        playersArray.push(player);
+        console.log("Player");
+        console.log(player);
         // add the client's username to the global list
         // similar to usernames.michel = 'michel', usernames.toto = 'toto'
         usernames[username] = username;
@@ -60,16 +61,11 @@ io.sockets.on('connection', function (socket) {
         // echo to all client except current, that a new person has connected
         socket.broadcast.emit('updatechat', 'SERVER', username + ' has connected');
         // tell all clients to update the list of users on the GUI
-        io.sockets.emit('updateusers', usernames, arrays);
+        io.sockets.emit('updateusers', usernames);
 
-        // Create a new player and store his position too... for that
-        // we have an object that is a "list of players" in that form
-        // listOfPlayer = {'michel':{'x':0, 'y':0, 'v':0},
-        // 							john:{'x':10, 'y':10, 'v':0}}
-        // for this example we have x, y and v for speed... ?
-        var player = {'x':0, 'y':0, 'v':0}
-        listOfPlayers[username] = player;
-        io.sockets.emit('updatePlayers',listOfPlayers);
+        io.sockets.emit('updatePlayers',{
+            playersArray:playersArray
+        });
     });
 
     // when the user disconnects.. perform this
