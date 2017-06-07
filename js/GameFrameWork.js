@@ -4,7 +4,7 @@ var BALL_PLAYER_COLOR = 'white';
 var BALL_COLOR = 'yellow';
 var BALL_PLAYER_WIDTH = 50;
 var BALL_PLAYER_HEIGHT = 50;
-var BALL_PLAYER_RADIUS = 3;
+var BALL_PLAYER_RADIUS = 30;
 var BALL_PLAYER_SPEED = 10; //pixels
 var BALL_MAX_NUMBER = 5;
 var BALL_RADIUS = 30;
@@ -19,9 +19,11 @@ var BALLS_ARRAY = [];
 var PLAYERS_ARRAY = [];
 
 var player1, player2;
+var player1NumberOfWins;
+var player2NumberOfWins;
 
 //Players variable
-var PLAYER_SCORE_LIMIT = 100; // Le nombre max de points atteignable
+var PLAYER_SCORE_LIMIT = 5; // Le nombre max de points atteignable
 
 // Vars relative to the CANVAS
 var CANVAS, CTX, CANVAS_WIDTH, CANVAS_HEIGHT;
@@ -37,6 +39,7 @@ var mainmenuImageBackground;
 
 var currentGameState = gamesStates.mainMenu;
 var currentLevel = 1;
+var endOfGameLevel = 2;
 var TIME_BETWEEN_LEVELS = 10000; // 10 secondes
 
 
@@ -49,6 +52,7 @@ var GF = function(){
     // Un element dans laquelle on va afficher les points
     var point1;
     var point2;
+    var niveau;
 
     // vars for counting frames/s, used by the measureFPS function
     var frameCount = 0;
@@ -72,6 +76,7 @@ var GF = function(){
     var DOCUMENT_ID_CANVAS = "#myCanvas";
     var DOCUMENT_ID_POINT_JOUEUR_1 = "point1";
     var DOCUMENT_ID_POINT_JOUEUR_2 = "point2";
+    var DOCUMENT_ID_NIVEAU = "niveau";
 
     //------------------------------------------- FUNCTIONS ------------------------------------------------------------
 
@@ -177,6 +182,21 @@ var GF = function(){
                 }
 
                 break;
+
+            case gamesStates.gameOver:
+                CTX.drawImage(mainmenuImageBackground, 0, 0);
+                CTX.fillText("GAME OVER", 50, 100);
+                CTX.fillText("Press SPACE to start again", 50, 150);
+                var winner = player1NumberOfWins > player2NumberOfWins? "player1": "player2";
+                var winnerScore = player1NumberOfWins > player2NumberOfWins? player1NumberOfWins: player2NumberOfWins;
+                CTX.fillText("Winner is " + winner + " with " + winnerScore + " wins", 50, 200);
+                CTX.fillText("", 50, 250);
+
+                if (inputStates.space) {
+                    startNewGame();
+                }
+                currentGameState = gamesStates.gameOver;
+                break;
             case gamesStates.gameRunning:
                 CTX.drawImage(background, 0, 0);
                 // DRAWING
@@ -199,16 +219,25 @@ var GF = function(){
                 // TODO modify this when we have network game
                 point1.innerHTML = player1.score;
                 point2.innerHTML = player2.score;
-                break;
-            case gamesStates.gameOver:
-                CTX.fillText("GAME OVER", 50, 100);
-                CTX.fillText("Press SPACE to start again", 50, 150);
-                CTX.fillText("Move with arrow keys", 50, 200);
-                CTX.fillText("Survive 5 seconds for next level", 50, 250);
+                niveau.innerHTML = currentLevel;
 
-                if (inputStates.space) {
-                    startNewGame();
+                var max = maxScore();
+                if(max >= PLAYER_SCORE_LIMIT){
+                    if(player1.score > player2.score){
+                        player1NumberOfWins++;
+                    }
+                    else{
+                        player2NumberOfWins++;
+                    }
+                    if(currentLevel >= endOfGameLevel){
+                        currentGameState = gamesStates.gameOver;
+                    }
+                    else{
+
+                        goToNextLevel();
+                    }
                 }
+                break;
         }
 
     };
@@ -308,11 +337,13 @@ var GF = function(){
             if(hasBallCollided(player1.ball, ball)){
                 console.log("Collision player = " + player1.name);
                 player1.score++;
+                player1.speed++;
                 player1.ball.radius += 0.5;
             }else{
                 if(hasBallCollided(player2.ball, ball)){
                     console.log("Collision player = " + player2.name);
                     player2.score++;
+                    player2.speed++;
                     player2.ball.radius += 0.5;
                 }else{
                     array_temp.push(ball);
@@ -368,6 +399,9 @@ var GF = function(){
             else if(event.keyCode == 83){
                 inputStates.keyDownS = true;
             }
+            else if(event.keyCode == 32){
+                inputStates.space = true;
+            }
         }, false);
 
         //if the key will be released, change the states object
@@ -397,6 +431,9 @@ var GF = function(){
             else if(event.keyCode == 83){
                 inputStates.keyDownS = false;
             }
+            else if(event.keyCode == 32){
+                inputStates.space = false;
+            }
         }, false);
 
         // Mouse event listeners
@@ -417,10 +454,14 @@ var GF = function(){
     /** Launch the application
      */
     var start = function(){
+        niveau = document.getElementById(DOCUMENT_ID_NIVEAU);
         point1 = document.getElementById(DOCUMENT_ID_POINT_JOUEUR_1);
         point2 = document.getElementById(DOCUMENT_ID_POINT_JOUEUR_2);
         // Canvas, context etc.
         CANVAS = document.querySelector(DOCUMENT_ID_CANVAS);
+
+        player1NumberOfWins = 0;
+        player2NumberOfWins = 0;
 
         // often useful
         CANVAS_WIDTH = CANVAS.width;
@@ -467,9 +508,17 @@ var GF = function(){
         currentGameState = gamesStates.gameRunning;
     }
 
+    function reset() {
+        player1.score = 0;
+        player2.score = 0;
+        BALLS_ARRAY = [];
+    }
+
     function goToNextLevel() {
         currentLevel++;
         BALL_MAX_NUMBER = BALL_MAX_NUMBER + 2;
+        elapseTimeToAddBall = elapseTimeToAddBall / 2;
+        reset();
     }
 
     /** Our GameFramework returns a public API visible from outside its scope
