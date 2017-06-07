@@ -41,7 +41,10 @@ var currentGameState = gamesStates.mainMenu;
 var currentLevel = 1;
 var endOfGameLevel = 2;
 var TIME_BETWEEN_LEVELS = 10000; // 10 secondes
-
+var suckionSound; // Le son à jouer quand on mange un ball
+var levelUpSound;
+var gameStart;
+var endGame;
 
 /** Le FRAMEWORK de notre jeu.
  * Il suffit d'appeler la méthode start pour lancer le jeu.
@@ -186,16 +189,13 @@ var GF = function(){
             case gamesStates.gameOver:
                 CTX.drawImage(mainmenuImageBackground, 0, 0);
                 CTX.fillText("GAME OVER", 50, 100);
-                CTX.fillText("Press SPACE to start again", 50, 150);
                 var winner = player1NumberOfWins > player2NumberOfWins? "player1": "player2";
                 var winnerScore = player1NumberOfWins > player2NumberOfWins? player1NumberOfWins: player2NumberOfWins;
                 CTX.fillText("Winner is " + winner + " with " + winnerScore + " wins", 50, 200);
                 CTX.fillText("", 50, 250);
 
-                if (inputStates.space) {
-                    startNewGame();
-                }
                 currentGameState = gamesStates.gameOver;
+                endGame.play();
                 break;
             case gamesStates.gameRunning:
                 CTX.drawImage(background, 0, 0);
@@ -339,6 +339,7 @@ var GF = function(){
                 player1.score++;
                 player1.speed++;
                 player1.ball.radius += 0.5;
+                suckionSound.play();
             }else{
                 if(hasBallCollided(player2.ball, ball)){
                     console.log("Collision player = " + player2.name);
@@ -473,9 +474,9 @@ var GF = function(){
         CTX.font="20px Arial";
 
         background = new Image();
-        background.src = "ressource/background.jpg";
+        background.src = "images/background.jpg";
         mainmenuImageBackground = new Image();
-        mainmenuImageBackground.src = "ressource/serveimage.png";
+        mainmenuImageBackground.src = "images/serveimage.png";
 
         // adds a div for displaying the fps value
         fpsContainer = document.createElement('div');
@@ -498,13 +499,17 @@ var GF = function(){
         // Créer une balle
         createBall();
 
+
         // start the animation
-        requestAnimationFrame(mainLoop);
+        loadAssets(function () {
+            requestAnimationFrame(mainLoop);
+        })
     };
 
     function startNewGame() {
         currentLevel = 1;
         BALL_MAX_NUMBER = 5;
+        gameStart.play();
         currentGameState = gamesStates.gameRunning;
     }
 
@@ -516,9 +521,47 @@ var GF = function(){
 
     function goToNextLevel() {
         currentLevel++;
+        levelUpSound.play();
         BALL_MAX_NUMBER = BALL_MAX_NUMBER + 2;
         elapseTimeToAddBall = elapseTimeToAddBall / 2;
         reset();
+    }
+
+    function loadAssets(callback) {
+        // here we should load the souds, the sprite sheets etc.
+        // then at the end call the callback function
+
+        // simple example that loads a sound and then calls the callback. We used the howler.js WebAudio lib here.
+        // Load sounds asynchronously using howler.js
+        gameStart = new Howl({
+            urls: ['sounds/Game_Start.mp3'],
+            autoplay: false,
+            volume: 2
+        });
+
+        endGame = new Howl({
+            urls: ['sounds/End_Game.mp3'],
+            autoplay: false,
+            volume: 2
+        });
+
+        levelUpSound = new Howl({
+            urls: ['sounds/level_up.mp3'],
+            autoplay: false,
+            volume: 2
+        });
+
+        suckionSound = new Howl({
+            urls: ['sounds/Suck_Up.wav'],
+            autoplay: false,
+            volume: 1,
+            onload: function () {
+                console.log("all sounds loaded");
+                // We're done!
+                callback();
+            }
+        });
+
     }
 
     /** Our GameFramework returns a public API visible from outside its scope
