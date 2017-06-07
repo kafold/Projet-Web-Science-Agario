@@ -1,11 +1,35 @@
+
+//Balls global variable
+var BALL_PLAYER_COLOR = 'blue';
+var BALL_PLAYER_WIDTH = 50;
+var BALL_PLAYER_HEIGHT = 50;
+var BALL_PLAYER_RADIUS = 3;
+var BALL_PLAYER_SPEED = 10; //pixels
+var BALL_MAX_NUMBER = 5;
+var BALL_RADIUS = 30;
+
+var MOUSE_DOWN_SPEED = 500;
+var MOUSE_UP_SPEED = 100;
+
+// array of balls to animate
+var BALLS_ARRAY = [];
+
+//array of players
+var PLAYERS_ARRAY = [];
+
+var player1, player2;
+
+//Players variable
+var PLAYER_SCORE_LIMIT = 100; // Le nombre max de points atteignable
+
+// Vars relative to the CANVAS
+var CANVAS, CTX, CANVAS_WIDTH, CANVAS_HEIGHT;
+
 /** Le FRAMEWORK de notre jeu.
  * Il suffit d'appeler la méthode start pour lancer le jeu.
  *
  */
 var GF = function(){
-    // Vars relative to the canvas
-    var canvas, ctx, w, h;
-
     // TODO modifier l'affichage - variable selon nombre de joueur
     // Un element dans laquelle on va afficher les points
     var point1;
@@ -25,28 +49,10 @@ var GF = function(){
     // vars for handling inputs
     var inputStates = {};
 
-    // Singleton contenant les variables nécessaire aux classes externes.
-    var GLOBAL_OBJECT = {};
-    //Balls global variable
-    var BALL_PLAYER_COLOR = 'blue';
-    var BALL_PLAYER_WIDTH = 50;
-    var BALL_PLAYER_HEIGHT = 50;
-    var BALL_PLAYER_RADIUS = 3;
-    var BALL_PLAYER_SPEED = 10; //pixels
-    var BALL_MAX_NUMBER = 5;
-    var BALL_RADIUS = 30;
-
-    // Time after which we add another ball to the canvas
+    // Time after which we add another ball to the CANVAS
     var elapseTimeToAddBall = 2000; // in milliseconds
 
-    //Players variable
-    var PLAYER_SCORE_LIMIT = 100; // Le nombre max de points atteignable
-
-    // array of balls to animate
-    var ballsArray = [];
-
-    //array of players
-    var playersArray = [];
+    var array_temp = [];
 
     var DOCUMENT_ID_CANVAS = "#myCanvas";
     var DOCUMENT_ID_POINT_JOUEUR_1 = "point1";
@@ -79,10 +85,10 @@ var GF = function(){
         return fps;
     };
 
-    /** clears the canvas content
+    /** clears the CANVAS content
      */
     function clearCanvas() {
-        ctx.clearRect(0, 0, w, h);
+        CTX.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     }
 
     /** Calculate difference in time since last frame
@@ -99,18 +105,18 @@ var GF = function(){
     /** Déssine les balles de tout les joueurs
      */
     function drawPlayersBall() {
-        for(var i = 0; i < playersArray.length; i++){
-            var player = playersArray[i];
-            player.ball.draw(ctx);
+        for(var i = 0; i < PLAYERS_ARRAY.length; i++){
+            var player = PLAYERS_ARRAY[i];
+            player.ball.draw(CTX);
         }
     }
 
     /** Déssine les balles des non-joueurs
      */
     function drawBalls() {
-        for(var i = 0; i < ballsArray.length; i++){
-            var ball = ballsArray[i];
-            ball.draw(ctx);
+        for(var i = 0; i < BALLS_ARRAY.length; i++){
+            var ball = BALLS_ARRAY[i];
+            ball.draw(CTX);
         }
     }
 
@@ -133,7 +139,7 @@ var GF = function(){
         // number of ms since last frame draw
         delta = timer(time);
 
-        // Clear the canvas
+        // Clear the CANVAS
         clearCanvas();
 
         // DRAWING
@@ -149,16 +155,18 @@ var GF = function(){
         if((time/elapseTimeToAddBall) - oldSeconds >= 1){
             //Add new balls
             //Only every second
-            createBall(GLOBAL_OBJECT);
+            createBall();
         }
         oldSeconds = Math.floor(time/elapseTimeToAddBall);
 
         // call the animation loop every 1/60th of second
-        requestAnimationFrame(mainLoop);
+        if(maxScore() < PLAYER_SCORE_LIMIT) {
+            requestAnimationFrame(mainLoop);
+        }
 
         // TODO modify this when we have network game
-        point1.innerHTML = findPlayerByName("player1", GLOBAL_OBJECT).score;
-        point2.innerHTML = findPlayerByName("player2", GLOBAL_OBJECT).score;
+        point1.innerHTML = player1.score;
+        point2.innerHTML = player2.score;
     };
 
     /** Mise à jour de la position des joueurs
@@ -166,71 +174,71 @@ var GF = function(){
      * @param delta le temps écoulé depuis la derniére frame
      */
     function updatePlayerPosition(delta) {
-        var player1 = findPlayerByName("player1", GLOBAL_OBJECT).ball;
-        var player2 = findPlayerByName("player2", GLOBAL_OBJECT).ball;
+        var player1Ball = player1.ball;
+        var player2Ball = player2.ball;
 
-        var player1speedX = 0;
-        var player1speedY = 0;
-        var player1speed = player1.speed;
+        var player1BallspeedX = 0;
+        var player1BallspeedY = 0;
+        var player1Ballspeed = player1.ball.speed;
 
-        var player2speedX = 0;
-        var player2speedY = 0;
-        var player2speed = player2.speed;
+        var player2BallspeedX = 0;
+        var player2BallspeedY = 0;
+        var player2Ballspeed = player2.ball.speed;
 
         // check inputStates
         if (inputStates.left) {
-            player1speedX = -player1speed;
+            player1BallspeedX = -player1Ballspeed;
         }
         if (inputStates.up) {
-            player1speedY = -player1speed;
+            player1BallspeedY = -player1Ballspeed;
         }
         if (inputStates.right) {
-            player1speedX = player1speed;
+            player1BallspeedX = player1Ballspeed;
         }
         if (inputStates.down) {
-            player1speedY = player1speed;
+            player1BallspeedY = player1Ballspeed;
         }
         if (inputStates.space) {
         }
         if (inputStates.mousePos) {
         }
         if (inputStates.mousedown) {
-            player1.speed = 500;
+            player1Ball.speed = MOUSE_DOWN_SPEED;
         } else {
             // mouse up
-            player1.speed = 100;
+            player1Ball.speed = MOUSE_UP_SPEED;
         }
 
         // check inputStates
         if (inputStates.keyDownA) {
-            player2speedX = -player2speed;
+            player2BallspeedX = -player2Ballspeed;
         }
         if (inputStates.keyDownZ) {
-            player2speedY = -player2speed;
+            player2BallspeedY = -player2Ballspeed;
         }
         if (inputStates.keyDownE) {
-            player2speedX = player2speed;
+            player2BallspeedX = player2Ballspeed;
         }
         if (inputStates.keyDownS) {
-            player2speedY = player2speed;
+            player2BallspeedY = player2Ballspeed;
         }
         if (inputStates.mousedown) {
-            player2.speed = 500;
+            player2Ball.speed = MOUSE_DOWN_SPEED;
         } else {
             // mouse up
-            player2.speed = 100;
+            player2Ball.speed = MOUSE_UP_SPEED;
         }
 
         // Compute the incX and inY in pixels depending
         // on the time elasped since last redraw
-        player1.x += calcDistanceToMove(delta, player1speedX);
-        player1.y += calcDistanceToMove(delta, player1speedY);
+        player1.ball.x += calcDistanceToMove(delta, player1BallspeedX);
+        player1.ball.y += calcDistanceToMove(delta, player1BallspeedY);
 
-        player2.x += calcDistanceToMove(delta, player2speedX);
-        player2.y += calcDistanceToMove(delta, player2speedY);
+        player2.ball.x += calcDistanceToMove(delta, player2BallspeedX);
+        player2.ball.y += calcDistanceToMove(delta, player2BallspeedY);
 
-        testCollisionWithWalls(player1, GLOBAL_OBJECT);
-        testCollisionWithWalls(player2, GLOBAL_OBJECT);
+        testCollisionWithWalls(player1.ball);
+        testCollisionWithWalls(player2.ball);
     }
 
     /** Mise à jour des balles
@@ -242,26 +250,33 @@ var GF = function(){
     function updateBalls(delta) {
         var ball;
         // for each ball in the array
-        for(var i = ballsArray.length - 1; i >= 0; --i) {
-            ball = ballsArray[i];
+        array_temp = [];
+        for(var i = 0; i < BALLS_ARRAY.length ; i++) {
+            ball = BALLS_ARRAY[i];
 
-            // 1) move the ball
-            ball.move(delta);
+            // 1) deplacer the ball
+            ball.deplacer(delta);
 
             // 2) test if the ball collides with a wall
-            testCollisionWithWalls(ball, GLOBAL_OBJECT);
+            testCollisionWithWalls(ball);
 
             // Mise à jour du score des joueurs en cas de collisions
-            for(var j = 0; j < playersArray.length; j++){
-                var player = playersArray[j];
-                // TODO modifier car la suppression se fait mal
-                if(hasBallCollided(player.ball, ball)){
-                    ballsArray.splice(j, 1);
-                    player.score++;
-                    player.ball.radius += 0.5;
+            if(hasBallCollided(player1.ball, ball)){
+                console.log("Collision player = " + player1.name);
+                player1.score++;
+                player1.ball.radius += 0.5;
+            }else{
+                if(hasBallCollided(player2.ball, ball)){
+                    console.log("Collision player = " + player2.name);
+                    player2.score++;
+                    player2.ball.radius += 0.5;
+                }else{
+                    array_temp.push(ball);
                 }
             }
+
         }
+        BALLS_ARRAY = array_temp;
     }
 
     /** Retourne un objet représentant la position de la souris en (x,y)
@@ -271,7 +286,7 @@ var GF = function(){
      */
     function getMousePos(evt) {
         // necessary to take into account CSS boudaries
-        var rect = canvas.getBoundingClientRect();
+        var rect = CANVAS.getBoundingClientRect();
         return {
             x: evt.clientX - rect.left,
             y: evt.clientY - rect.top
@@ -341,54 +356,18 @@ var GF = function(){
         }, false);
 
         // Mouse event listeners
-        canvas.addEventListener('mousemove', function (evt) {
+        CANVAS.addEventListener('mousemove', function (evt) {
             inputStates.mousePos = getMousePos(evt);
         }, false);
 
-        canvas.addEventListener('mousedown', function (evt) {
+        CANVAS.addEventListener('mousedown', function (evt) {
             inputStates.mousedown = true;
             inputStates.mouseButton = evt.button;
         }, false);
 
-        canvas.addEventListener('mouseup', function (evt) {
+        CANVAS.addEventListener('mouseup', function (evt) {
             inputStates.mousedown = false;
         }, false);
-    }
-
-    /** Initialise une variable globale qu'on passeras aux classes externe
-     * afin de partager les informations nécessaire.
-     *
-     * Singleton
-     *
-     * @returns {{BALL_PLAYER_COLOR: string, BALL_PLAYER_WIDTH: number, BALL_PLAYER_HEIGHT: number, BALL_PLAYER_RADIUS: number, BALL_PLAYER_SPEED: number}}
-     */
-    function initialiseGlobalObject() {
-        // Canvas, context etc.
-        canvas = document.querySelector(DOCUMENT_ID_CANVAS);
-
-        // often useful
-        w = canvas.width;
-        h = canvas.height;
-
-        // important, we will draw with this object
-        ctx = canvas.getContext('2d');
-        // default police for text
-        ctx.font="20px Arial";
-        return {
-            ctx: ctx,
-            canvasWidth: w,
-            canvasHeight: h,
-            BALL_PLAYER_COLOR: BALL_PLAYER_COLOR,
-            BALL_PLAYER_WIDTH: BALL_PLAYER_WIDTH,
-            BALL_PLAYER_HEIGHT: BALL_PLAYER_HEIGHT,
-            BALL_PLAYER_RADIUS: BALL_PLAYER_RADIUS,
-            BALL_PLAYER_SPEED: BALL_PLAYER_SPEED,
-            BALL_MAX_NUMBER:BALL_MAX_NUMBER,
-            BALLS_ARRAY: ballsArray,
-            PLAYERS_ARRAY:playersArray,
-            PLAYERS_SCORE_LIMIT: PLAYER_SCORE_LIMIT,
-            BALL_RADIUS:BALL_RADIUS
-        }
     }
 
     /** Launch the application
@@ -396,20 +375,34 @@ var GF = function(){
     var start = function(){
         point1 = document.getElementById(DOCUMENT_ID_POINT_JOUEUR_1);
         point2 = document.getElementById(DOCUMENT_ID_POINT_JOUEUR_2);
+        // Canvas, context etc.
+        CANVAS = document.querySelector(DOCUMENT_ID_CANVAS);
+
+        // often useful
+        CANVAS_WIDTH = CANVAS.width;
+        CANVAS_HEIGHT = CANVAS.height;
+
+        // important, we will draw with this object
+        CTX = CANVAS.getContext('2d');
+        // default police for text
+        CTX.font="20px Arial";
+
         // adds a div for displaying the fps value
         fpsContainer = document.createElement('div');
         document.body.appendChild(fpsContainer);
 
-        GLOBAL_OBJECT = initialiseGlobalObject();
-
         // Créer deux joueurs pour le moment
         // Créer les balles pour les joueurs
-        createPlayer(2, GLOBAL_OBJECT);
+        createPlayer(2);
+        player1 = findPlayerByName("player1");
+        console.log(player1);
+        player2 = findPlayerByName("player2");
+        console.log(player2);
 
         initialiseListeners();
 
         // Créer une balle
-        createBall(GLOBAL_OBJECT);
+        createBall();
 
         // start the animation
         requestAnimationFrame(mainLoop);

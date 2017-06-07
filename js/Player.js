@@ -9,7 +9,7 @@ function Player(name, ball) {
  * @param number
  * @param playersArray
  */
-function createPlayer(number, globalObject) {
+function createPlayer(number) {
     var player;
     var width;
     var height;
@@ -20,20 +20,20 @@ function createPlayer(number, globalObject) {
     var speed;
     var color;
     var ball;
-    var w = globalObject.canvasWidth;
-    var h = globalObject.canvasHeight;
+    var w = CANVAS_WIDTH;
+    var h = CANVAS_HEIGHT;
     for(var i = 1; i <= number; i++){
-        width = globalObject.BALL_PLAYER_WIDTH;
-        height = globalObject.BALL_PLAYER_HEIGHT;
+        width = BALL_PLAYER_WIDTH;
+        height = BALL_PLAYER_HEIGHT;
         x = getRandomArbitrary(width,w - width);
         y = getRandomArbitrary(height,h - height);
         angle = (2 * Math.PI) * Math.random();
-        diameter = globalObject.BALL_PLAYER_RADIUS;
-        speed = globalObject.BALL_PLAYER_SPEED;
-        color = globalObject.BALL_PLAYER_COLOR;
+        diameter = BALL_PLAYER_RADIUS;
+        speed = BALL_PLAYER_SPEED;
+        color = BALL_PLAYER_COLOR;
         ball = new Ball(x,y,angle,speed,diameter,color);
         player = new Player("player" + i, ball);
-        globalObject.PLAYERS_ARRAY.push(player);
+        PLAYERS_ARRAY.push(player);
     }
 }
 
@@ -43,9 +43,9 @@ function createPlayer(number, globalObject) {
  * @param globalObject
  * @returns {*}
  */
-function findPlayerByName(name, globalObject) {
-    for(var i = 0; i < globalObject.PLAYERS_ARRAY.length; i++){
-        var player = globalObject.PLAYERS_ARRAY[i];
+function findPlayerByName(name) {
+    for(var i = 0; i < PLAYERS_ARRAY.length; i++){
+        var player = PLAYERS_ARRAY[i];
         if(name === player.name){
             return player;
         }

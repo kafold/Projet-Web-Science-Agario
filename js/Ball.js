@@ -31,7 +31,7 @@ function Ball(x, y, angle, speed, diameter, color) {
         ctx.restore();
     };
 
-    this.move = function(delta) {
+    this.deplacer = function(delta) {
         // add horizontal increment to the x pos
         // add vertical increment to the y pos
 
@@ -51,18 +51,17 @@ function Ball(x, y, angle, speed, diameter, color) {
  * @param maxScore
  * @param limit
  */
-function createBall(globalObject) {
-    var max = maxScore(globalObject.PLAYERS_ARRAY);
-    var ballsArray = globalObject.BALLS_ARRAY;
-    if(ballsArray.length < globalObject.BALL_MAX_NUMBER && max < globalObject.PLAYERS_SCORE_LIMIT){
-        var radius = globalObject.BALL_RADIUS;
-        var ball =  new Ball(radius + Math.random() * (globalObject.canvasWidth - radius * 2),
-            radius + Math.random() * (globalObject.canvasHeight - radius * 2),
+function createBall() {
+    var max = maxScore();
+    if(BALLS_ARRAY.length < BALL_MAX_NUMBER && max < PLAYER_SCORE_LIMIT){
+        var radius = BALL_RADIUS;
+        var ball =  new Ball(radius + Math.random() * (CANVAS_WIDTH - radius * 2),
+            radius + Math.random() * (CANVAS_HEIGHT - radius * 2),
             (2 * Math.PI) * Math.random(),
             (80*Math.random()),
             radius);
         // On la rajoute au tableau
-        ballsArray.push(ball);
+        BALLS_ARRAY.push(ball);
     }
 }
 
@@ -71,25 +70,26 @@ function createBall(globalObject) {
  * @param playersArray
  * @returns {number} le score max
  */
-function maxScore(playersArray){
-    if(!playersArray) return 0;
+function maxScore(){
+    if(!PLAYERS_ARRAY) return 0;
     var max = 0;
-    for (var player in playersArray){
+    for (var i = 0; i < PLAYERS_ARRAY.length; i++){
+        var player = PLAYERS_ARRAY[i];
         max = player.score > max? player.score: max;
     }
     return max;
 }
 
 
-/** Test si la balle(ball) a touché un coté du canvas
+/** Test si la balle(ball) a touché un coté du CANVAS
  * Change l'angle de la balle si c'est le cas
  *
  * @param ball
  * @param globalObject
  */
-function testCollisionWithWalls(ball, globalObject) {
-    w = globalObject.canvasWidth;
-    h = globalObject.canvasHeight;
+function testCollisionWithWalls(ball) {
+    var w = CANVAS_WIDTH;
+    var h = CANVAS_HEIGHT;
     // left
     if (ball.x < ball.radius) {
         ball.x = ball.radius;
