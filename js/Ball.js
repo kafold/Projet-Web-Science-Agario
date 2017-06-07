@@ -44,26 +44,29 @@ function Ball(x, y, angle, speed, diameter, color) {
 }
 
 /** Créer une balle
- *
- * @param ballArray
- * @param canvasWidth
- * @param canvasHeight
- * @param maxScore
- * @param limit
  */
-function createBall(globalObject) {
-    var max = maxScore(globalObject.PLAYERS_ARRAY);
-    var ballsArray = globalObject.BALLS_ARRAY;
-    if(ballsArray.length < globalObject.BALL_MAX_NUMBER && max < globalObject.PLAYERS_SCORE_LIMIT){
-        var radius = globalObject.BALL_RADIUS;
-        var ball =  new Ball(radius + Math.random() * (globalObject.canvasWidth - radius * 2),
-            radius + Math.random() * (globalObject.canvasHeight - radius * 2),
+function createBall() {
+    console.log("################### createBall() ################### ");
+    console.log("createBall: BALLS_ARRAY before addition ");
+    console.log(BALLS_ARRAY);
+    var max = maxScore();
+    if(BALLS_ARRAY.length < BALL_MAX_NUMBER && max < PLAYER_SCORE_LIMIT){
+        var radius = BALL_RADIUS;
+        var ball =  new Ball(radius + Math.random() * (CANVAS_WIDTH - radius * 2),
+            radius + Math.random() * (CANVAS_HEIGHT - radius * 2),
             (2 * Math.PI) * Math.random(),
             (80*Math.random()),
             radius);
         // On la rajoute au tableau
-        ballsArray.push(ball);
+        BALLS_ARRAY.push(ball);
+        console.log("createBall: just add a ball");
+        console.log("createBall: ball is ");
+        console.log(ball);
+        console.log("createBall: BALLS_ARRAY is ");
+        console.log(BALLS_ARRAY);
+
     }
+    console.log("################################################## ");
 }
 
 /** Calcule le score maximum entre les joueurs
@@ -71,10 +74,10 @@ function createBall(globalObject) {
  * @param playersArray
  * @returns {number} le score max
  */
-function maxScore(playersArray){
-    if(!playersArray) return 0;
+function maxScore(){
     var max = 0;
-    for (var player in playersArray){
+    for (var i = 0; i < PLAYERS_ARRAY.length; i++){
+        var player = PLAYERS_ARRAY[i];
         max = player.score > max? player.score: max;
     }
     return max;
@@ -87,9 +90,9 @@ function maxScore(playersArray){
  * @param ball
  * @param globalObject
  */
-function testCollisionWithWalls(ball, globalObject) {
-    w = globalObject.canvasWidth;
-    h = globalObject.canvasHeight;
+function testCollisionWithWalls(ball) {
+    w = CANVAS_WIDTH;
+    h = CANVAS_HEIGHT;
     // left
     if (ball.x < ball.radius) {
         ball.x = ball.radius;

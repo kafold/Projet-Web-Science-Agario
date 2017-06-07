@@ -1,0 +1,23 @@
+{
+  "name": "projet_javascript_webscience",
+  "version": "1.0.0",
+  "description": "agario",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kafold/Projet-Web-Science-Agario.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kafold/Projet-Web-Science-Agario/issues"
+  },
+  "homepage": "https://github.com/kafold/Projet-Web-Science-Agario#readme",
+  "dependencies": {
+    "express": "^4.15.3",
+    "socket.io": "^2.0.2"
+  }
+}
